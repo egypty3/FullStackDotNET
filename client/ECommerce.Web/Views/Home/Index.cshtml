@@ -1,0 +1,380 @@
+﻿@{
+    ViewData["Title"] = "Welcome to ShopNow";
+}
+
+<!-- Hero Section -->
+<section class="store-hero animate__animated animate__fadeIn">
+    <div class="row align-items-center">
+        <div class="col-lg-6">
+            <span class="badge bg-white text-primary px-3 py-2 mb-3 fs-6">
+                <i class="fas fa-sparkles me-1"></i> New Arrivals
+            </span>
+            <h1 class="display-3 fw-800 mb-3 text-white">
+                Discover Your<br>
+                <span class="store-hero-highlight">Perfect Style</span>
+            </h1>
+            <p class="lead mb-4" style="color: rgba(255,255,255,0.85); font-size: 1.15rem;">
+                Shop the latest trends with confidence. Premium products, unbeatable prices, and lightning-fast delivery.
+            </p>
+            <div class="d-flex gap-3 flex-wrap">
+                <a href="#products" class="btn btn-light btn-lg px-4 fw-semibold">
+                    <i class="fas fa-shopping-bag me-2"></i>Shop Now
+                </a>
+                <a href="#categories" class="btn btn-outline-light btn-lg px-4">
+                    <i class="fas fa-th-large me-2"></i>Browse Categories
+                </a>
+            </div>
+            <div class="d-flex gap-4 mt-4">
+                <div class="text-center">
+                    <h4 class="fw-bold text-white mb-0" id="hero-products">--</h4>
+                    <small style="color:rgba(255,255,255,0.7);">Products</small>
+                </div>
+                <div class="text-center">
+                    <h4 class="fw-bold text-white mb-0" id="hero-categories">--</h4>
+                    <small style="color:rgba(255,255,255,0.7);">Categories</small>
+                </div>
+                <div class="text-center">
+                    <h4 class="fw-bold text-white mb-0" id="hero-reviews">--</h4>
+                    <small style="color:rgba(255,255,255,0.7);">Reviews</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6 text-center d-none d-lg-block">
+            <div class="hero-illustration">
+                <i class="fas fa-bag-shopping" style="font-size: 12rem; color: rgba(255,255,255,0.1);"></i>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Trust Badges -->
+<section class="py-4">
+    <div class="row g-3 text-center">
+        <div class="col-md-3 col-6">
+            <div class="d-flex align-items-center justify-content-center gap-2 text-muted">
+                <i class="fas fa-truck fa-lg text-primary"></i>
+                <span class="fw-semibold small">Free Shipping</span>
+            </div>
+        </div>
+        <div class="col-md-3 col-6">
+            <div class="d-flex align-items-center justify-content-center gap-2 text-muted">
+                <i class="fas fa-shield-alt fa-lg text-success"></i>
+                <span class="fw-semibold small">Secure Payment</span>
+            </div>
+        </div>
+        <div class="col-md-3 col-6">
+            <div class="d-flex align-items-center justify-content-center gap-2 text-muted">
+                <i class="fas fa-undo fa-lg text-warning"></i>
+                <span class="fw-semibold small">Easy Returns</span>
+            </div>
+        </div>
+        <div class="col-md-3 col-6">
+            <div class="d-flex align-items-center justify-content-center gap-2 text-muted">
+                <i class="fas fa-headset fa-lg text-info"></i>
+                <span class="fw-semibold small">24/7 Support</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Category Filter -->
+<section id="categories" class="mt-4 animate__animated animate__fadeInUp">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3 class="fw-bold mb-0">
+            <i class="fas fa-th-large me-2 text-primary"></i>Shop by Category
+        </h3>
+    </div>
+    <div id="category-pills" class="d-flex flex-wrap gap-2 mb-4">
+        <button class="btn btn-primary rounded-pill px-4 category-filter active" data-category="all">
+            <i class="fas fa-border-all me-1"></i> All
+        </button>
+        <!-- Categories loaded dynamically -->
+    </div>
+</section>
+
+<!-- Products Grid -->
+<section id="products" class="mt-2 animate__animated animate__fadeInUp" style="animation-delay: 0.15s;">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3 class="fw-bold mb-0">
+            <i class="fas fa-fire me-2 text-danger"></i>Our Products
+        </h3>
+        <div class="d-flex align-items-center gap-2">
+            <select id="sort-select" class="form-select form-select-sm" style="width:auto;">
+                <option value="name">Name A-Z</option>
+                <option value="name-desc">Name Z-A</option>
+                <option value="price-low">Price: Low to High</option>
+                <option value="price-high">Price: High to Low</option>
+            </select>
+        </div>
+    </div>
+
+    <div id="products-loading" class="text-center py-5">
+        <div class="spinner-border text-primary" role="status"></div>
+        <p class="text-muted mt-2">Loading products...</p>
+    </div>
+
+    <div id="products-grid" class="row g-4" style="display:none;"></div>
+
+    <div id="no-products" class="text-center py-5" style="display:none;">
+        <i class="fas fa-search fa-3x text-muted mb-3"></i>
+        <h5 class="text-muted">No products found in this category</h5>
+    </div>
+</section>
+
+<!-- Product Detail Modal -->
+<div class="modal fade" id="productDetailModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 rounded-4 overflow-hidden">
+            <div class="modal-body p-0">
+                <button type="button" class="btn-close position-absolute top-0 end-0 m-3 z-3"
+                    data-bs-dismiss="modal" style="background-color: rgba(255,255,255,0.8); border-radius: 50%; padding: 0.6rem;"></button>
+                <div class="row g-0">
+                    <div class="col-md-5 d-flex align-items-center justify-content-center p-4"
+                        style="background: linear-gradient(135deg, #f8f9fa, #e9ecef); min-height: 300px; overflow:hidden;">
+                        <img id="detail-image-img" src="" alt="" style="width:100%;height:100%;object-fit:cover;display:none;">
+                        <i class="fas fa-box fa-5x text-muted opacity-25" id="detail-image-icon"></i>
+                    </div>
+                    <div class="col-md-7 p-4">
+                        <span class="badge bg-primary-subtle text-primary mb-2" id="detail-category">Category</span>
+                        <h3 class="fw-bold" id="detail-name">Product Name</h3>
+                        <div class="d-flex align-items-center gap-2 mb-3">
+                            <div id="detail-rating" class="text-warning"></div>
+                            <small class="text-muted" id="detail-review-count">(0 reviews)</small>
+                        </div>
+                        <p class="text-muted" id="detail-description">Description goes here...</p>
+                        <div class="d-flex align-items-end gap-2 mb-3">
+                            <h2 class="fw-800 text-primary mb-0" id="detail-price">$0.00</h2>
+                        </div>
+                        <div class="d-flex gap-2 mb-3">
+                            <span class="badge bg-light text-dark border">
+                                <i class="fas fa-barcode me-1"></i>SKU: <span id="detail-sku">--</span>
+                            </span>
+                            <span class="badge" id="detail-stock-badge">
+                                <i class="fas fa-warehouse me-1"></i><span id="detail-stock">--</span>
+                            </span>
+                        </div>
+                        <hr>
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-primary btn-lg flex-grow-1" disabled>
+                                <i class="fas fa-cart-plus me-2"></i>Add to Cart
+                            </button>
+                            <button class="btn btn-outline-danger btn-lg" disabled>
+                                <i class="fas fa-heart"></i>
+                            </button>
+                        </div>
+                        <small class="text-muted d-block mt-2 text-center">
+                            <i class="fas fa-info-circle me-1"></i>Cart functionality coming soon
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Newsletter Section -->
+<section class="mt-5 mb-4">
+    <div class="card border-0 rounded-4 overflow-hidden" style="background: var(--primary-gradient);">
+        <div class="card-body p-5 text-center text-white">
+            <i class="fas fa-envelope-open-text fa-3x mb-3" style="opacity: 0.8;"></i>
+            <h3 class="fw-bold">Stay in the Loop</h3>
+            <p class="mb-4" style="color: rgba(255,255,255,0.85);">
+                Get notified about new arrivals, exclusive deals, and more.
+            </p>
+            <div class="row justify-content-center">
+                <div class="col-md-6">
+                    <div class="input-group input-group-lg">
+                        <input type="email" class="form-control border-0" placeholder="Enter your email..." />
+                        <button class="btn btn-dark px-4" type="button">
+                            <i class="fas fa-paper-plane me-1"></i> Subscribe
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+<script>
+var allProducts = [];
+var allCategories = [];
+var activeCategory = 'all';
+
+$(function () {
+    loadCategories();
+    loadProducts();
+
+    $('#sort-select').on('change', function () {
+        renderProducts();
+    });
+});
+
+function loadCategories() {
+    apiGet('/api/categories', function (cats) {
+        allCategories = cats;
+        $('#hero-categories').text(cats.length);
+        var pills = $('#category-pills');
+        cats.forEach(function (c) {
+            if (c.isActive) {
+                pills.append(
+                    '<button class="btn btn-outline-primary rounded-pill px-4 category-filter" data-category="' +
+                    escapeHtml(c.id) + '">' + escapeHtml(c.name) + '</button>'
+                );
+            }
+        });
+
+        $('.category-filter').on('click', function () {
+            $('.category-filter').removeClass('active btn-primary').addClass('btn-outline-primary');
+            $(this).removeClass('btn-outline-primary').addClass('active btn-primary');
+            activeCategory = $(this).data('category');
+            renderProducts();
+        });
+    });
+}
+
+function loadProducts() {
+    apiGet('/api/products', function (products) {
+        allProducts = products;
+        $('#hero-products').text(products.length);
+        $('#products-loading').hide();
+        $('#products-grid').show();
+        renderProducts();
+    }, function () {
+        $('#products-loading').html(
+            '<i class="fas fa-exclamation-circle fa-3x text-danger mb-3"></i>' +
+            '<p class="text-muted">Failed to load products. Please try again.</p>'
+        );
+    });
+
+    apiGet('/api/reviews', function (reviews) {
+        $('#hero-reviews').text(reviews.length);
+    });
+}
+
+function renderProducts() {
+    var filtered = allProducts;
+    if (activeCategory !== 'all') {
+        filtered = allProducts.filter(function (p) {
+            return p.categoryId === activeCategory;
+        });
+    }
+
+    var sort = $('#sort-select').val();
+    filtered.sort(function (a, b) {
+        switch (sort) {
+            case 'name': return a.name.localeCompare(b.name);
+            case 'name-desc': return b.name.localeCompare(a.name);
+            case 'price-low': return (a.priceAmount || a.price || 0) - (b.priceAmount || b.price || 0);
+            case 'price-high': return (b.priceAmount || b.price || 0) - (a.priceAmount || a.price || 0);
+            default: return 0;
+        }
+    });
+
+    var grid = $('#products-grid');
+    grid.empty();
+
+    if (filtered.length === 0) {
+        grid.hide();
+        $('#no-products').show();
+        return;
+    }
+
+    $('#no-products').hide();
+    grid.show();
+
+    filtered.forEach(function (p) {
+        var price = p.priceAmount || p.price || 0;
+        var currency = p.priceCurrency || 'USD';
+        var stock = p.stockQuantity || 0;
+        var stockClass = stock > 10 ? 'bg-success-subtle text-success' : stock > 0 ? 'bg-warning-subtle text-warning' : 'bg-danger-subtle text-danger';
+        var stockText = stock > 10 ? 'In Stock' : stock > 0 ? 'Low Stock' : 'Out of Stock';
+        var categoryName = p.categoryName || 'Uncategorized';
+
+        var card = '' +
+            '<div class="col-lg-3 col-md-4 col-sm-6 product-item">' +
+            '  <div class="card product-card h-100 border-0 shadow-sm" style="cursor:pointer;" ' +
+            '       onclick="showProductDetail(\'' + p.id + '\')">' +
+            '    <div class="card-img-top d-flex align-items-center justify-content-center" ' +
+            '         style="height: 200px; background: linear-gradient(135deg, #f8f9fa, #e9ecef); overflow:hidden;">' +
+            (p.imageUrl
+                ? '      <img src="' + escapeHtml(p.imageUrl) + '" alt="' + escapeHtml(p.name) + '" ' +
+                  '           style="width:100%;height:100%;object-fit:cover;" ' +
+                  '           onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'block\';">' +
+                  '      <i class="fas fa-box fa-4x text-muted" style="opacity:0.2;display:none;"></i>'
+                : '      <i class="fas fa-box fa-4x text-muted" style="opacity:0.2;"></i>') + ' ' +
+            '    </div>' +
+            '    <div class="card-body d-flex flex-column">' +
+            '      <div class="d-flex justify-content-between align-items-start mb-2">' +
+            '        <span class="badge bg-primary-subtle text-primary small">' + escapeHtml(categoryName) + '</span>' +
+            '        <span class="badge ' + stockClass + ' small">' + stockText + '</span>' +
+            '      </div>' +
+            '      <h6 class="fw-bold mb-1">' + escapeHtml(p.name) + '</h6>' +
+            '      <p class="text-muted small mb-3 flex-grow-1" style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">' +
+                     escapeHtml(p.description || '') + '</p>' +
+            '      <div class="d-flex justify-content-between align-items-center mt-auto">' +
+            '        <span class="fw-800 text-primary fs-5">$' + price.toFixed(2) + '</span>' +
+            '        <button class="btn btn-sm btn-outline-primary rounded-pill" disabled>' +
+            '          <i class="fas fa-cart-plus"></i>' +
+            '        </button>' +
+            '      </div>' +
+            '    </div>' +
+            '  </div>' +
+            '</div>';
+        grid.append(card);
+    });
+}
+
+function showProductDetail(productId) {
+    var p = allProducts.find(function (x) { return x.id === productId; });
+    if (!p) return;
+
+    var price = p.priceAmount || p.price || 0;
+    var stock = p.stockQuantity || 0;
+    var stockClass = stock > 0 ? 'bg-success-subtle text-success' : 'bg-danger-subtle text-danger';
+    var stockText = stock > 0 ? stock + ' in stock' : 'Out of stock';
+
+    $('#detail-name').text(p.name);
+    $('#detail-category').text(p.categoryName || 'Uncategorized');
+    $('#detail-description').text(p.description || 'No description available.');
+    $('#detail-price').text('$' + price.toFixed(2));
+    $('#detail-sku').text(p.sku || '--');
+    $('#detail-stock').text(stockText);
+    $('#detail-stock-badge').attr('class', 'badge ' + stockClass);
+
+    // Set product image in detail modal
+    if (p.imageUrl) {
+        $('#detail-image-img').attr('src', p.imageUrl).attr('alt', p.name).show();
+        $('#detail-image-icon').hide();
+    } else {
+        $('#detail-image-img').hide();
+        $('#detail-image-icon').show();
+    }
+
+    // Load reviews for this product
+    $('#detail-rating').html('<i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i>');
+    $('#detail-review-count').text('');
+
+    apiGet('/api/reviews', function (reviews) {
+        var productReviews = reviews.filter(function (r) { return r.productId === productId; });
+        var count = productReviews.length;
+        if (count > 0) {
+            var avg = productReviews.reduce(function (sum, r) { return sum + r.rating; }, 0) / count;
+            var stars = '';
+            for (var i = 1; i <= 5; i++) {
+                if (i <= Math.floor(avg)) stars += '<i class="fas fa-star"></i>';
+                else if (i - 0.5 <= avg) stars += '<i class="fas fa-star-half-alt"></i>';
+                else stars += '<i class="far fa-star"></i>';
+            }
+            $('#detail-rating').html(stars);
+            $('#detail-review-count').text('(' + count + ' review' + (count > 1 ? 's' : '') + ')');
+        } else {
+            $('#detail-rating').html('<small class="text-muted">No reviews yet</small>');
+            $('#detail-review-count').text('');
+        }
+    });
+
+    new bootstrap.Modal(document.getElementById('productDetailModal')).show();
+}
+</script>
+}

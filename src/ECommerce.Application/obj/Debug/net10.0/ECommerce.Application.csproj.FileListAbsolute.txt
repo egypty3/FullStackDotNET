@@ -1,0 +1,15 @@
+/Users/tarekmostafa/scratch/FullStackDotNET/src/ECommerce.Application/bin/Debug/net10.0/ECommerce.Application.deps.json
+/Users/tarekmostafa/scratch/FullStackDotNET/src/ECommerce.Application/bin/Debug/net10.0/ECommerce.Application.dll
+/Users/tarekmostafa/scratch/FullStackDotNET/src/ECommerce.Application/bin/Debug/net10.0/ECommerce.Application.pdb
+/Users/tarekmostafa/scratch/FullStackDotNET/src/ECommerce.Application/bin/Debug/net10.0/ECommerce.Domain.dll
+/Users/tarekmostafa/scratch/FullStackDotNET/src/ECommerce.Application/bin/Debug/net10.0/ECommerce.Domain.pdb
+/Users/tarekmostafa/scratch/FullStackDotNET/src/ECommerce.Application/obj/Debug/net10.0/ECommerce.Application.csproj.AssemblyReference.cache
+/Users/tarekmostafa/scratch/FullStackDotNET/src/ECommerce.Application/obj/Debug/net10.0/ECommerce.Application.GeneratedMSBuildEditorConfig.editorconfig
+/Users/tarekmostafa/scratch/FullStackDotNET/src/ECommerce.Application/obj/Debug/net10.0/ECommerce.Application.AssemblyInfoInputs.cache
+/Users/tarekmostafa/scratch/FullStackDotNET/src/ECommerce.Application/obj/Debug/net10.0/ECommerce.Application.AssemblyInfo.cs
+/Users/tarekmostafa/scratch/FullStackDotNET/src/ECommerce.Application/obj/Debug/net10.0/ECommerce.Application.csproj.CoreCompileInputs.cache
+/Users/tarekmostafa/scratch/FullStackDotNET/src/ECommerce.Application/obj/Debug/net10.0/ECommerc.670E0CBE.Up2Date
+/Users/tarekmostafa/scratch/FullStackDotNET/src/ECommerce.Application/obj/Debug/net10.0/ECommerce.Application.dll
+/Users/tarekmostafa/scratch/FullStackDotNET/src/ECommerce.Application/obj/Debug/net10.0/refint/ECommerce.Application.dll
+/Users/tarekmostafa/scratch/FullStackDotNET/src/ECommerce.Application/obj/Debug/net10.0/ECommerce.Application.pdb
+/Users/tarekmostafa/scratch/FullStackDotNET/src/ECommerce.Application/obj/Debug/net10.0/ref/ECommerce.Application.dll

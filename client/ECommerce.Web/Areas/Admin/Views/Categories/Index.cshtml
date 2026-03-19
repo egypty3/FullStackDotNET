@@ -1,0 +1,275 @@
+@{
+    ViewData["Title"] = "Categories";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4 animate__animated animate__fadeIn">
+    <div>
+        <h2 class="fw-bold mb-1"><i class="fas fa-tags me-2 text-primary"></i>Categories</h2>
+        <p class="text-muted mb-0">Manage product categories</p>
+    </div>
+    <button class="btn btn-primary" onclick="showCreateCategoryModal()">
+        <i class="fas fa-plus me-2"></i>Add Category
+    </button>
+</div>
+
+<!-- Category Cards Overview -->
+<div id="categories-cards" class="row g-4 mb-4 animate__animated animate__fadeInUp"></div>
+
+<!-- Category Table -->
+<div class="card shadow-sm animate__animated animate__fadeInUp">
+    <div class="card-header bg-white">
+        <h5 class="mb-0"><i class="fas fa-list me-2"></i>Category List</h5>
+    </div>
+    <div class="card-body">
+        <table id="categoriesTable" class="table table-hover w-100">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Status</th>
+                    <th>Created</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Create/Edit Category Modal -->
+<div class="modal fade" id="categoryModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="categoryModalTitle">
+                    <i class="fas fa-plus me-2"></i>Add Category
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="categoryForm">
+                    <input type="hidden" id="categoryId" />
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Category Name</label>
+                        <input type="text" class="form-control" id="categoryName" maxlength="100" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Description</label>
+                        <textarea class="form-control" id="categoryDescription" rows="3" maxlength="500"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-1"></i>Cancel
+                </button>
+                <button type="button" class="btn btn-primary" onclick="saveCategory()">
+                    <i class="fas fa-save me-1"></i>Save Category
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+var categoriesTable;
+var allCategories = [];
+var categoryIcons = {
+    'Electronics': 'fa-microchip',
+    'Clothing': 'fa-shirt',
+    'Books': 'fa-book',
+    'Home & Garden': 'fa-house',
+    'Sports': 'fa-volleyball',
+    'Food': 'fa-utensils'
+};
+var categoryColors = ['primary', 'success', 'info', 'warning', 'danger', 'secondary', 'dark'];
+
+$(function () {
+    loadCategories();
+});
+
+function loadCategories() {
+    apiGet('/api/categories', function (data) {
+        allCategories = data;
+        initCategoriesTable(data);
+        renderCategoryCards(data);
+    });
+}
+
+function renderCategoryCards(data) {
+    var html = '';
+    data.forEach(function (c, i) {
+        var icon = categoryIcons[c.name] || 'fa-tag';
+        var color = categoryColors[i % categoryColors.length];
+        html += '<div class="col-md-4 col-lg-3 animate__animated animate__fadeIn">' +
+            '<div class="card h-100 shadow-sm border-0" style="border-left: 4px solid var(--bs-' + color + ') !important;">' +
+                '<div class="card-body text-center">' +
+                    '<div class="rounded-circle bg-' + color + ' bg-opacity-10 d-inline-flex align-items-center justify-content-center mb-3" style="width:60px;height:60px;">' +
+                        '<i class="fas ' + icon + ' fa-xl text-' + color + '"></i>' +
+                    '</div>' +
+                    '<h6 class="fw-bold mb-1">' + escapeHtml(c.name) + '</h6>' +
+                    '<p class="text-muted small mb-2">' + escapeHtml(c.description || 'No description') + '</p>' +
+                    (c.isActive
+                        ? '<span class="badge bg-success"><i class="fas fa-check me-1"></i>Active</span>'
+                        : '<span class="badge bg-secondary"><i class="fas fa-ban me-1"></i>Inactive</span>') +
+                '</div>' +
+            '</div>' +
+        '</div>';
+    });
+    $('#categories-cards').html(html);
+}
+
+function initCategoriesTable(data) {
+    if (categoriesTable) {
+        categoriesTable.clear().rows.add(data).draw();
+        return;
+    }
+
+    var isAuth = !!localStorage.getItem('jwt_token');
+
+    var columns = [
+        {
+            data: 'name',
+            render: function (d) {
+                var icon = categoryIcons[d] || 'fa-tag';
+                return '<i class="fas ' + icon + ' me-2 text-primary"></i><span class="fw-semibold">' + escapeHtml(d) + '</span>';
+            }
+        },
+        {
+            data: 'description',
+            render: function (d) {
+                return '<span class="text-muted">' + escapeHtml(d || 'No description') + '</span>';
+            }
+        },
+        {
+            data: 'isActive',
+            render: function (d) {
+                return d ? '<span class="badge bg-success"><i class="fas fa-check me-1"></i>Active</span>'
+                         : '<span class="badge bg-secondary"><i class="fas fa-ban me-1"></i>Inactive</span>';
+            }
+        },
+        {
+            data: 'createdAt',
+            render: function (d) {
+                return new Date(d).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+            }
+        }
+    ];
+
+    if (isAuth) {
+        columns.push({
+            data: null,
+            orderable: false,
+            render: function (d, t, row) {
+                var toggleBtn = row.isActive
+                    ? '<button class="btn btn-outline-warning" title="Deactivate" onclick="toggleCategoryStatus(\'' + row.id + '\')"><i class="fas fa-ban"></i></button>'
+                    : '<button class="btn btn-outline-success" title="Activate" onclick="toggleCategoryStatus(\'' + row.id + '\')"><i class="fas fa-check"></i></button>';
+                return '<div class="btn-group btn-group-sm">' +
+                    toggleBtn +
+                    '<button class="btn btn-outline-primary" title="Edit" onclick="editCategory(\'' + row.id + '\')"><i class="fas fa-edit"></i></button>' +
+                    '<button class="btn btn-outline-danger" title="Delete" onclick="deleteCategory(\'' + row.id + '\')"><i class="fas fa-trash"></i></button>' +
+                    '</div>';
+            }
+        });
+    }
+
+    categoriesTable = $('#categoriesTable').DataTable({
+        data: data,
+        columns: columns,
+        responsive: true,
+        pageLength: 10,
+        language: {
+            emptyTable: '<div class="text-center py-4"><i class="fas fa-tags fa-3x text-muted mb-3"></i><p class="text-muted">No categories found</p></div>',
+            search: '<i class="fas fa-search"></i>',
+            searchPlaceholder: 'Search categories...'
+        },
+        dom: '<"row"<"col-sm-6"l><"col-sm-6"f>>rtip'
+    });
+}
+
+function showCreateCategoryModal() {
+    $('#categoryModalTitle').html('<i class="fas fa-plus me-2"></i>Add Category');
+    $('#categoryForm')[0].reset();
+    $('#categoryId').val('');
+    new bootstrap.Modal('#categoryModal').show();
+}
+
+function editCategory(id) {
+    var c = allCategories.find(function (x) { return x.id === id; });
+    if (!c) return;
+    $('#categoryModalTitle').html('<i class="fas fa-edit me-2"></i>Edit Category');
+    $('#categoryId').val(c.id);
+    $('#categoryName').val(c.name);
+    $('#categoryDescription').val(c.description);
+    new bootstrap.Modal('#categoryModal').show();
+}
+
+function saveCategory() {
+    var id = $('#categoryId').val();
+    var payload = {
+        name: $('#categoryName').val(),
+        description: $('#categoryDescription').val()
+    };
+
+    if (!payload.name) {
+        return toastError('Category name is required.');
+    }
+
+    if (id) {
+        payload.id = id;
+        apiRequest('PUT', '/api/categories/' + id, payload, function () {
+            bootstrap.Modal.getInstance(document.getElementById('categoryModal')).hide();
+            toastSuccess('Category updated successfully!');
+            loadCategories();
+        });
+    } else {
+        apiRequest('POST', '/api/categories', payload, function () {
+            bootstrap.Modal.getInstance(document.getElementById('categoryModal')).hide();
+            toastSuccess('Category created successfully!');
+            loadCategories();
+        });
+    }
+}
+
+function deleteCategory(id) {
+    Swal.fire({
+        title: 'Delete Category?',
+        text: 'This action will deactivate the category.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#dc3545',
+        confirmButtonText: '<i class="fas fa-trash me-1"></i>Yes, delete it!',
+        cancelButtonText: 'Cancel'
+    }).then(function (result) {
+        if (result.isConfirmed) {
+            apiRequest('DELETE', '/api/categories/' + id, null, function () {
+                toastSuccess('Category deleted successfully!');
+                loadCategories();
+            });
+        }
+    });
+}
+
+function toggleCategoryStatus(id) {
+    var c = allCategories.find(function (x) { return x.id === id; });
+    if (!c) return;
+    var action = c.isActive ? 'deactivate' : 'activate';
+    Swal.fire({
+        title: (c.isActive ? 'Deactivate' : 'Activate') + ' Category?',
+        text: 'Are you sure you want to ' + action + ' "' + c.name + '"?',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: '<i class="fas fa-' + (c.isActive ? 'ban' : 'check') + ' me-1"></i>Yes, ' + action + ' it!',
+        cancelButtonText: 'Cancel'
+    }).then(function (result) {
+        if (result.isConfirmed) {
+            apiRequest('PATCH', '/api/categories/' + id + '/toggle-status', null, function () {
+                toastSuccess('Category ' + action + 'd successfully!');
+                loadCategories();
+            });
+        }
+    });
+}
+</script>
+}

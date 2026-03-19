@@ -1,0 +1,188 @@
+@{
+    ViewData["Title"] = "Shipments";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4 animate__animated animate__fadeIn">
+    <div>
+        <h2 class="fw-bold mb-1"><i class="fas fa-shipping-fast me-2 text-primary"></i>Shipments</h2>
+        <p class="text-muted mb-0">Track and manage shipments</p>
+    </div>
+    <button class="btn btn-primary" onclick="showCreateShipmentModal()">
+        <i class="fas fa-plus me-2"></i>New Shipment
+    </button>
+</div>
+
+<!-- Stats Row -->
+<div class="row g-4 mb-4 animate__animated animate__fadeInUp">
+    <div class="col-md-2"><div class="card shadow-sm border-0"><div class="card-body text-center"><i class="fas fa-box fa-lg text-primary mb-1"></i><h4 class="fw-bold mb-0" id="stat-total">0</h4><small class="text-muted">Total</small></div></div></div>
+    <div class="col-md-2"><div class="card shadow-sm border-0"><div class="card-body text-center"><i class="fas fa-clock fa-lg text-warning mb-1"></i><h4 class="fw-bold mb-0" id="stat-pending">0</h4><small class="text-muted">Pending</small></div></div></div>
+    <div class="col-md-2"><div class="card shadow-sm border-0"><div class="card-body text-center"><i class="fas fa-truck fa-lg text-info mb-1"></i><h4 class="fw-bold mb-0" id="stat-transit">0</h4><small class="text-muted">In Transit</small></div></div></div>
+    <div class="col-md-2"><div class="card shadow-sm border-0"><div class="card-body text-center"><i class="fas fa-dolly fa-lg text-primary mb-1"></i><h4 class="fw-bold mb-0" id="stat-out">0</h4><small class="text-muted">Out for Delivery</small></div></div></div>
+    <div class="col-md-2"><div class="card shadow-sm border-0"><div class="card-body text-center"><i class="fas fa-check-circle fa-lg text-success mb-1"></i><h4 class="fw-bold mb-0" id="stat-delivered">0</h4><small class="text-muted">Delivered</small></div></div></div>
+    <div class="col-md-2"><div class="card shadow-sm border-0"><div class="card-body text-center"><i class="fas fa-undo fa-lg text-danger mb-1"></i><h4 class="fw-bold mb-0" id="stat-returned">0</h4><small class="text-muted">Returned</small></div></div></div>
+</div>
+
+<!-- Shipment Table -->
+<div class="card shadow-sm animate__animated animate__fadeInUp">
+    <div class="card-header bg-white">
+        <h5 class="mb-0"><i class="fas fa-list me-2"></i>Shipment List</h5>
+    </div>
+    <div class="card-body">
+        <table id="shipmentsTable" class="table table-hover w-100">
+            <thead>
+                <tr>
+                    <th>Tracking #</th>
+                    <th>Shipper</th>
+                    <th>Status</th>
+                    <th>Shipped Date</th>
+                    <th>Est. Delivery</th>
+                    <th>Cost</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Create Shipment Modal -->
+<div class="modal fade" id="shipmentModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title"><i class="fas fa-plus me-2"></i>New Shipment</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="shipmentForm">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Order ID *</label>
+                        <input type="text" class="form-control" id="shipmentOrderId" required placeholder="Enter Order GUID" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Shipper *</label>
+                        <select class="form-select" id="shipmentShipperId" required>
+                            <option value="">Select shipper...</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Tracking Number *</label>
+                        <input type="text" class="form-control" id="shipmentTracking" maxlength="100" required />
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-semibold">Shipping Cost *</label>
+                            <div class="input-group"><span class="input-group-text">$</span><input type="number" class="form-control" id="shipmentCost" min="0" step="0.01" required /></div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-semibold">Est. Delivery</label>
+                            <input type="date" class="form-control" id="shipmentEstDelivery" />
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Notes</label>
+                        <textarea class="form-control" id="shipmentNotes" rows="2"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i class="fas fa-times me-1"></i>Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="saveShipment()"><i class="fas fa-save me-1"></i>Create Shipment</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+var shipmentsTable;
+var allShipments = [];
+var statusBadges = { 'Pending': 'warning', 'Shipped': 'info', 'InTransit': 'primary', 'OutForDelivery': 'dark', 'Delivered': 'success', 'Returned': 'danger' };
+
+$(function () { loadShipments(); });
+
+function loadShipments() {
+    apiGet('/api/shipments', function (data) {
+        allShipments = data;
+        var counts = { Pending: 0, Shipped: 0, InTransit: 0, OutForDelivery: 0, Delivered: 0, Returned: 0 };
+        data.forEach(function (s) { if (counts[s.status] !== undefined) counts[s.status]++; });
+        $('#stat-total').text(data.length);
+        $('#stat-pending').text(counts.Pending + counts.Shipped);
+        $('#stat-transit').text(counts.InTransit);
+        $('#stat-out').text(counts.OutForDelivery);
+        $('#stat-delivered').text(counts.Delivered);
+        $('#stat-returned').text(counts.Returned);
+        initShipmentsTable(data);
+    });
+}
+
+function initShipmentsTable(data) {
+    if (shipmentsTable) { shipmentsTable.clear().rows.add(data).draw(); return; }
+    var isAuth = !!localStorage.getItem('jwt_token');
+    var columns = [
+        { data: 'trackingNumber', render: function (d) { return '<code class="fw-bold">' + escapeHtml(d) + '</code>'; } },
+        { data: 'shipperName', render: function (d) { return '<i class="fas fa-truck me-1 text-primary"></i>' + escapeHtml(d); } },
+        { data: 'status', render: function (d) { var c = statusBadges[d] || 'secondary'; return '<span class="badge bg-' + c + '">' + escapeHtml(d) + '</span>'; } },
+        { data: 'shippedDate', render: function (d) { return d ? new Date(d).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : '-'; } },
+        { data: 'estimatedDeliveryDate', render: function (d) { return d ? new Date(d).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : '-'; } },
+        { data: 'shippingCost', render: function (d) { return '$' + Number(d).toFixed(2); } }
+    ];
+    if (isAuth) {
+        columns.push({ data: null, orderable: false, render: function (d, t, row) {
+            if (row.status === 'Delivered' || row.status === 'Returned') return '';
+            var nextStatus = { 'Pending': 'Shipped', 'Shipped': 'InTransit', 'InTransit': 'OutForDelivery', 'OutForDelivery': 'Delivered' };
+            var next = nextStatus[row.status];
+            if (!next) return '';
+            return '<button class="btn btn-sm btn-outline-primary" onclick="updateShipmentStatus(\'' + row.id + '\', \'' + next + '\')">' +
+                '<i class="fas fa-arrow-right me-1"></i>' + next + '</button>';
+        }});
+    }
+    shipmentsTable = $('#shipmentsTable').DataTable({ data: data, columns: columns, responsive: true, pageLength: 10,
+        language: { emptyTable: '<div class="text-center py-4"><i class="fas fa-shipping-fast fa-3x text-muted mb-3"></i><p class="text-muted">No shipments found</p></div>', search: '<i class="fas fa-search"></i>', searchPlaceholder: 'Search shipments...' },
+        dom: '<"row"<"col-sm-6"l><"col-sm-6"f>>rtip'
+    });
+}
+
+function showCreateShipmentModal() {
+    $('#shipmentForm')[0].reset();
+    apiGet('/api/shippers', function (shippers) {
+        var html = '<option value="">Select shipper...</option>';
+        shippers.filter(function (s) { return s.isActive; }).forEach(function (s) {
+            html += '<option value="' + s.id + '">' + escapeHtml(s.companyName) + '</option>';
+        });
+        $('#shipmentShipperId').html(html);
+    });
+    new bootstrap.Modal('#shipmentModal').show();
+}
+
+function saveShipment() {
+    var payload = {
+        orderId: $('#shipmentOrderId').val(),
+        shipperId: $('#shipmentShipperId').val(),
+        trackingNumber: $('#shipmentTracking').val(),
+        shippingCost: parseFloat($('#shipmentCost').val()) || 0,
+        estimatedDeliveryDate: $('#shipmentEstDelivery').val() || null,
+        notes: $('#shipmentNotes').val()
+    };
+    if (!payload.orderId || !payload.shipperId || !payload.trackingNumber) { return toastError('Order ID, shipper, and tracking number are required.'); }
+    apiRequest('POST', '/api/shipments', payload, function () {
+        bootstrap.Modal.getInstance(document.getElementById('shipmentModal')).hide();
+        toastSuccess('Shipment created successfully!');
+        loadShipments();
+    });
+}
+
+function updateShipmentStatus(id, status) {
+    Swal.fire({ title: 'Update Status?', text: 'Change shipment status to ' + status + '?', icon: 'question', showCancelButton: true,
+        confirmButtonText: '<i class="fas fa-check me-1"></i>Yes, update!', cancelButtonText: 'Cancel'
+    }).then(function (result) {
+        if (result.isConfirmed) {
+            apiRequest('PATCH', '/api/shipments/' + id + '/status', { status: status }, function () {
+                toastSuccess('Shipment status updated!');
+                loadShipments();
+            });
+        }
+    });
+}
+</script>
+}

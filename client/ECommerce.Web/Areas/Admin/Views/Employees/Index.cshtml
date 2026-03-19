@@ -1,0 +1,261 @@
+@{
+    ViewData["Title"] = "Employees";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4 animate__animated animate__fadeIn">
+    <div>
+        <h2 class="fw-bold mb-1"><i class="fas fa-user-tie me-2 text-primary"></i>Employees</h2>
+        <p class="text-muted mb-0">Manage company employees</p>
+    </div>
+    <button class="btn btn-primary" onclick="showCreateEmployeeModal()">
+        <i class="fas fa-plus me-2"></i>Add Employee
+    </button>
+</div>
+
+<!-- Stats Row -->
+<div class="row g-4 mb-4 animate__animated animate__fadeInUp">
+    <div class="col-md-3">
+        <div class="card shadow-sm border-0" style="border-left: 4px solid var(--bs-primary) !important;">
+            <div class="card-body text-center">
+                <i class="fas fa-user-tie fa-2x text-primary mb-2"></i>
+                <h3 class="fw-bold" id="stat-total">0</h3>
+                <p class="text-muted mb-0">Total Employees</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card shadow-sm border-0" style="border-left: 4px solid var(--bs-success) !important;">
+            <div class="card-body text-center">
+                <i class="fas fa-check-circle fa-2x text-success mb-2"></i>
+                <h3 class="fw-bold" id="stat-active">0</h3>
+                <p class="text-muted mb-0">Active</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card shadow-sm border-0" style="border-left: 4px solid var(--bs-info) !important;">
+            <div class="card-body text-center">
+                <i class="fas fa-building fa-2x text-info mb-2"></i>
+                <h3 class="fw-bold" id="stat-departments">0</h3>
+                <p class="text-muted mb-0">Departments</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card shadow-sm border-0" style="border-left: 4px solid var(--bs-warning) !important;">
+            <div class="card-body text-center">
+                <i class="fas fa-dollar-sign fa-2x text-warning mb-2"></i>
+                <h3 class="fw-bold" id="stat-avg-salary">$0</h3>
+                <p class="text-muted mb-0">Avg Salary</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Employee Table -->
+<div class="card shadow-sm animate__animated animate__fadeInUp">
+    <div class="card-header bg-white">
+        <h5 class="mb-0"><i class="fas fa-list me-2"></i>Employee List</h5>
+    </div>
+    <div class="card-body">
+        <table id="employeesTable" class="table table-hover w-100">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Department</th>
+                    <th>Position</th>
+                    <th>Salary</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Create/Edit Employee Modal -->
+<div class="modal fade" id="employeeModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="employeeModalTitle">
+                    <i class="fas fa-plus me-2"></i>Add Employee
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="employeeForm">
+                    <input type="hidden" id="employeeId" />
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-semibold">First Name *</label>
+                            <input type="text" class="form-control" id="employeeFirstName" maxlength="100" required />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-semibold">Last Name *</label>
+                            <input type="text" class="form-control" id="employeeLastName" maxlength="100" required />
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-semibold">Email *</label>
+                            <input type="email" class="form-control" id="employeeEmail" maxlength="200" required />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-semibold">Phone</label>
+                            <input type="text" class="form-control" id="employeePhone" maxlength="20" />
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-semibold">Department *</label>
+                            <input type="text" class="form-control" id="employeeDepartment" maxlength="100" required />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-semibold">Position *</label>
+                            <input type="text" class="form-control" id="employeePosition" maxlength="100" required />
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-semibold">Hire Date</label>
+                            <input type="date" class="form-control" id="employeeHireDate" />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-semibold">Salary *</label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input type="number" class="form-control" id="employeeSalary" min="0" step="0.01" required />
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-1"></i>Cancel
+                </button>
+                <button type="button" class="btn btn-primary" onclick="saveEmployee()">
+                    <i class="fas fa-save me-1"></i>Save Employee
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+var employeesTable;
+var allEmployees = [];
+
+$(function () { loadEmployees(); });
+
+function loadEmployees() {
+    apiGet('/api/employees', function (data) {
+        allEmployees = data;
+        var active = data.filter(function (e) { return e.isActive; }).length;
+        var depts = [];
+        data.forEach(function (e) { if (depts.indexOf(e.department) === -1) depts.push(e.department); });
+        var avgSalary = data.length > 0 ? data.reduce(function (s, e) { return s + e.salary; }, 0) / data.length : 0;
+        $('#stat-total').text(data.length);
+        $('#stat-active').text(active);
+        $('#stat-departments').text(depts.length);
+        $('#stat-avg-salary').text('$' + avgSalary.toLocaleString('en-US', { maximumFractionDigits: 0 }));
+        initEmployeesTable(data);
+    });
+}
+
+function initEmployeesTable(data) {
+    if (employeesTable) { employeesTable.clear().rows.add(data).draw(); return; }
+    var isAuth = !!localStorage.getItem('jwt_token');
+    var columns = [
+        { data: null, render: function (d, t, row) { return '<i class="fas fa-user-tie me-2 text-primary"></i><span class="fw-semibold">' + escapeHtml(row.firstName + ' ' + row.lastName) + '</span>'; } },
+        { data: 'email', render: function (d) { return '<a href="mailto:' + escapeHtml(d) + '">' + escapeHtml(d) + '</a>'; } },
+        { data: 'department', render: function (d) { return '<span class="badge bg-info">' + escapeHtml(d) + '</span>'; } },
+        { data: 'position', render: function (d) { return escapeHtml(d); } },
+        { data: 'salary', render: function (d) { return '$' + Number(d).toLocaleString('en-US', { minimumFractionDigits: 2 }); } },
+        { data: 'isActive', render: function (d) { return d ? '<span class="badge bg-success"><i class="fas fa-check me-1"></i>Active</span>' : '<span class="badge bg-secondary"><i class="fas fa-ban me-1"></i>Inactive</span>'; } }
+    ];
+    if (isAuth) {
+        columns.push({ data: null, orderable: false, render: function (d, t, row) {
+            return '<div class="btn-group btn-group-sm">' +
+                '<button class="btn btn-outline-primary" title="Edit" onclick="editEmployee(\'' + row.id + '\')"><i class="fas fa-edit"></i></button>' +
+                '<button class="btn btn-outline-danger" title="Delete" onclick="deleteEmployee(\'' + row.id + '\')"><i class="fas fa-trash"></i></button></div>';
+        }});
+    }
+    employeesTable = $('#employeesTable').DataTable({ data: data, columns: columns, responsive: true, pageLength: 10,
+        language: { emptyTable: '<div class="text-center py-4"><i class="fas fa-user-tie fa-3x text-muted mb-3"></i><p class="text-muted">No employees found</p></div>', search: '<i class="fas fa-search"></i>', searchPlaceholder: 'Search employees...' },
+        dom: '<"row"<"col-sm-6"l><"col-sm-6"f>>rtip'
+    });
+}
+
+function showCreateEmployeeModal() {
+    $('#employeeModalTitle').html('<i class="fas fa-plus me-2"></i>Add Employee');
+    $('#employeeForm')[0].reset();
+    $('#employeeId').val('');
+    new bootstrap.Modal('#employeeModal').show();
+}
+
+function editEmployee(id) {
+    var e = allEmployees.find(function (x) { return x.id === id; });
+    if (!e) return;
+    $('#employeeModalTitle').html('<i class="fas fa-edit me-2"></i>Edit Employee');
+    $('#employeeId').val(e.id);
+    $('#employeeFirstName').val(e.firstName);
+    $('#employeeLastName').val(e.lastName);
+    $('#employeeEmail').val(e.email);
+    $('#employeePhone').val(e.phone);
+    $('#employeeDepartment').val(e.department);
+    $('#employeePosition').val(e.position);
+    $('#employeeHireDate').val(e.hireDate ? e.hireDate.substring(0, 10) : '');
+    $('#employeeSalary').val(e.salary);
+    new bootstrap.Modal('#employeeModal').show();
+}
+
+function saveEmployee() {
+    var id = $('#employeeId').val();
+    var payload = {
+        firstName: $('#employeeFirstName').val(),
+        lastName: $('#employeeLastName').val(),
+        email: $('#employeeEmail').val(),
+        phone: $('#employeePhone').val(),
+        department: $('#employeeDepartment').val(),
+        position: $('#employeePosition').val(),
+        hireDate: $('#employeeHireDate').val() || new Date().toISOString().substring(0, 10),
+        salary: parseFloat($('#employeeSalary').val()) || 0
+    };
+    if (!payload.firstName || !payload.lastName || !payload.email || !payload.department || !payload.position) {
+        return toastError('First name, last name, email, department, and position are required.');
+    }
+    if (id) {
+        payload.id = id;
+        apiRequest('PUT', '/api/employees/' + id, payload, function () {
+            bootstrap.Modal.getInstance(document.getElementById('employeeModal')).hide();
+            toastSuccess('Employee updated successfully!');
+            loadEmployees();
+        });
+    } else {
+        apiRequest('POST', '/api/employees', payload, function () {
+            bootstrap.Modal.getInstance(document.getElementById('employeeModal')).hide();
+            toastSuccess('Employee created successfully!');
+            loadEmployees();
+        });
+    }
+}
+
+function deleteEmployee(id) {
+    Swal.fire({ title: 'Delete Employee?', text: 'This action will deactivate the employee.', icon: 'warning', showCancelButton: true,
+        confirmButtonColor: '#dc3545', confirmButtonText: '<i class="fas fa-trash me-1"></i>Yes, delete!', cancelButtonText: 'Cancel'
+    }).then(function (result) {
+        if (result.isConfirmed) {
+            apiRequest('DELETE', '/api/employees/' + id, null, function () {
+                toastSuccess('Employee deleted successfully!');
+                loadEmployees();
+            });
+        }
+    });
+}
+</script>
+}

@@ -1,0 +1,239 @@
+@{
+    ViewData["Title"] = "Coupons";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4 animate__animated animate__fadeIn">
+    <div>
+        <h2 class="fw-bold mb-1"><i class="fas fa-ticket-alt me-2 text-primary"></i>Coupons</h2>
+        <p class="text-muted mb-0">Manage discount coupons</p>
+    </div>
+    <button class="btn btn-primary" onclick="showCreateCouponModal()">
+        <i class="fas fa-plus me-2"></i>Add Coupon
+    </button>
+</div>
+
+<!-- Coupon Cards -->
+<div id="coupon-cards" class="row g-4 mb-4 animate__animated animate__fadeInUp"></div>
+
+<!-- Coupon Table -->
+<div class="card shadow-sm animate__animated animate__fadeInUp">
+    <div class="card-header bg-white">
+        <h5 class="mb-0"><i class="fas fa-list me-2"></i>Coupon List</h5>
+    </div>
+    <div class="card-body">
+        <table id="couponsTable" class="table table-hover w-100">
+            <thead>
+                <tr>
+                    <th>Code</th>
+                    <th>Description</th>
+                    <th>Discount</th>
+                    <th>Uses</th>
+                    <th>Expires</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Create/Edit Coupon Modal -->
+<div class="modal fade" id="couponModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="couponModalTitle">
+                    <i class="fas fa-plus me-2"></i>Add Coupon
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="couponForm">
+                    <input type="hidden" id="couponId" />
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-semibold">Coupon Code *</label>
+                            <input type="text" class="form-control text-uppercase" id="couponCode" maxlength="50" required placeholder="e.g. SAVE20" />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-semibold">Discount Type *</label>
+                            <select class="form-select" id="couponDiscountType" required onchange="updateDiscountLabel()">
+                                <option value="Percentage">Percentage (%)</option>
+                                <option value="FixedAmount">Fixed Amount ($)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Description</label>
+                        <input type="text" class="form-control" id="couponDescription" maxlength="500" />
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-semibold" id="discountValueLabel">Discount Value *</label>
+                            <div class="input-group">
+                                <input type="number" class="form-control" id="couponDiscountValue" min="0" step="0.01" required />
+                                <span class="input-group-text" id="discountValueSuffix">%</span>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-semibold">Min Order Amount</label>
+                            <div class="input-group"><span class="input-group-text">$</span><input type="number" class="form-control" id="couponMinOrder" min="0" step="0.01" /></div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-semibold">Max Uses *</label>
+                            <input type="number" class="form-control" id="couponMaxUses" min="1" required />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-semibold">Expires At *</label>
+                            <input type="date" class="form-control" id="couponExpiresAt" required />
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i class="fas fa-times me-1"></i>Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="saveCoupon()"><i class="fas fa-save me-1"></i>Save Coupon</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+var couponsTable;
+var allCoupons = [];
+var couponColors = ['success', 'primary', 'info', 'warning', 'danger', 'secondary'];
+
+$(function () { loadCoupons(); });
+
+function loadCoupons() {
+    apiGet('/api/coupons', function (data) {
+        allCoupons = data;
+        renderCouponCards(data);
+        initCouponsTable(data);
+    });
+}
+
+function renderCouponCards(data) {
+    var html = '';
+    data.forEach(function (c, i) {
+        var color = couponColors[i % couponColors.length];
+        var discountText = c.discountType === 'Percentage' ? c.discountValue + '%' : '$' + c.discountValue;
+        var expired = new Date(c.expiresAt) < new Date();
+        html += '<div class="col-md-4 col-lg-3 animate__animated animate__fadeIn">' +
+            '<div class="card h-100 shadow-sm border-0" style="border-left: 4px solid var(--bs-' + color + ') !important;">' +
+                '<div class="card-body text-center">' +
+                    '<div class="rounded-circle bg-' + color + ' bg-opacity-10 d-inline-flex align-items-center justify-content-center mb-3" style="width:60px;height:60px;">' +
+                        '<i class="fas fa-ticket-alt fa-xl text-' + color + '"></i>' +
+                    '</div>' +
+                    '<h6 class="fw-bold mb-1"><code>' + escapeHtml(c.code) + '</code></h6>' +
+                    '<p class="text-muted small mb-2">' + escapeHtml(c.description || 'No description') + '</p>' +
+                    '<h5 class="text-' + color + ' fw-bold mb-2">' + discountText + ' OFF</h5>' +
+                    '<small class="text-muted">' + c.currentUses + '/' + c.maxUses + ' uses</small><br/>' +
+                    (c.isActive && !expired ? '<span class="badge bg-success mt-1"><i class="fas fa-check me-1"></i>Active</span>' :
+                        expired ? '<span class="badge bg-danger mt-1"><i class="fas fa-clock me-1"></i>Expired</span>' :
+                        '<span class="badge bg-secondary mt-1"><i class="fas fa-ban me-1"></i>Inactive</span>') +
+                '</div>' +
+            '</div></div>';
+    });
+    $('#coupon-cards').html(html);
+}
+
+function initCouponsTable(data) {
+    if (couponsTable) { couponsTable.clear().rows.add(data).draw(); return; }
+    var isAuth = !!localStorage.getItem('jwt_token');
+    var columns = [
+        { data: 'code', render: function (d) { return '<code class="fw-bold fs-6">' + escapeHtml(d) + '</code>'; } },
+        { data: 'description', render: function (d) { return '<span class="text-muted">' + escapeHtml(d || '-') + '</span>'; } },
+        { data: null, render: function (d, t, row) { return row.discountType === 'Percentage' ? '<span class="badge bg-primary">' + row.discountValue + '% OFF</span>' : '<span class="badge bg-success">$' + row.discountValue + ' OFF</span>'; } },
+        { data: null, render: function (d, t, row) { var pct = row.maxUses > 0 ? Math.round((row.currentUses / row.maxUses) * 100) : 0; return '<div class="progress" style="height:20px;"><div class="progress-bar" style="width:' + pct + '%">' + row.currentUses + '/' + row.maxUses + '</div></div>'; } },
+        { data: 'expiresAt', render: function (d) { var exp = new Date(d); var now = new Date(); var cls = exp < now ? 'text-danger' : 'text-muted'; return '<span class="' + cls + '">' + exp.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) + '</span>'; } },
+        { data: 'isActive', render: function (d, t, row) { var expired = new Date(row.expiresAt) < new Date(); if (expired) return '<span class="badge bg-danger">Expired</span>'; return d ? '<span class="badge bg-success">Active</span>' : '<span class="badge bg-secondary">Inactive</span>'; } }
+    ];
+    if (isAuth) {
+        columns.push({ data: null, orderable: false, render: function (d, t, row) {
+            return '<div class="btn-group btn-group-sm">' +
+                '<button class="btn btn-outline-primary" title="Edit" onclick="editCoupon(\'' + row.id + '\')"><i class="fas fa-edit"></i></button>' +
+                '<button class="btn btn-outline-danger" title="Delete" onclick="deleteCoupon(\'' + row.id + '\')"><i class="fas fa-trash"></i></button></div>';
+        }});
+    }
+    couponsTable = $('#couponsTable').DataTable({ data: data, columns: columns, responsive: true, pageLength: 10,
+        language: { emptyTable: '<div class="text-center py-4"><i class="fas fa-ticket-alt fa-3x text-muted mb-3"></i><p class="text-muted">No coupons found</p></div>', search: '<i class="fas fa-search"></i>', searchPlaceholder: 'Search coupons...' },
+        dom: '<"row"<"col-sm-6"l><"col-sm-6"f>>rtip'
+    });
+}
+
+function updateDiscountLabel() {
+    var type = $('#couponDiscountType').val();
+    $('#discountValueSuffix').text(type === 'Percentage' ? '%' : '$');
+}
+
+function showCreateCouponModal() {
+    $('#couponModalTitle').html('<i class="fas fa-plus me-2"></i>Add Coupon');
+    $('#couponForm')[0].reset();
+    $('#couponId').val('');
+    updateDiscountLabel();
+    new bootstrap.Modal('#couponModal').show();
+}
+
+function editCoupon(id) {
+    var c = allCoupons.find(function (x) { return x.id === id; });
+    if (!c) return;
+    $('#couponModalTitle').html('<i class="fas fa-edit me-2"></i>Edit Coupon');
+    $('#couponId').val(c.id);
+    $('#couponCode').val(c.code);
+    $('#couponDescription').val(c.description);
+    $('#couponDiscountType').val(c.discountType);
+    $('#couponDiscountValue').val(c.discountValue);
+    $('#couponMinOrder').val(c.minOrderAmount);
+    $('#couponMaxUses').val(c.maxUses);
+    $('#couponExpiresAt').val(c.expiresAt ? c.expiresAt.substring(0, 10) : '');
+    updateDiscountLabel();
+    new bootstrap.Modal('#couponModal').show();
+}
+
+function saveCoupon() {
+    var id = $('#couponId').val();
+    var payload = {
+        code: $('#couponCode').val().toUpperCase(),
+        description: $('#couponDescription').val(),
+        discountType: $('#couponDiscountType').val(),
+        discountValue: parseFloat($('#couponDiscountValue').val()) || 0,
+        minOrderAmount: parseFloat($('#couponMinOrder').val()) || null,
+        maxUses: parseInt($('#couponMaxUses').val()) || 0,
+        expiresAt: $('#couponExpiresAt').val()
+    };
+    if (!payload.code || !payload.discountValue || !payload.maxUses || !payload.expiresAt) { return toastError('Code, discount value, max uses, and expiry are required.'); }
+    if (id) {
+        payload.id = id;
+        apiRequest('PUT', '/api/coupons/' + id, payload, function () {
+            bootstrap.Modal.getInstance(document.getElementById('couponModal')).hide();
+            toastSuccess('Coupon updated successfully!');
+            loadCoupons();
+        });
+    } else {
+        apiRequest('POST', '/api/coupons', payload, function () {
+            bootstrap.Modal.getInstance(document.getElementById('couponModal')).hide();
+            toastSuccess('Coupon created successfully!');
+            loadCoupons();
+        });
+    }
+}
+
+function deleteCoupon(id) {
+    Swal.fire({ title: 'Delete Coupon?', text: 'This will deactivate the coupon.', icon: 'warning', showCancelButton: true,
+        confirmButtonColor: '#dc3545', confirmButtonText: '<i class="fas fa-trash me-1"></i>Delete', cancelButtonText: 'Cancel'
+    }).then(function (result) {
+        if (result.isConfirmed) {
+            apiRequest('DELETE', '/api/coupons/' + id, null, function () {
+                toastSuccess('Coupon deleted!');
+                loadCoupons();
+            });
+        }
+    });
+}
+</script>
+}

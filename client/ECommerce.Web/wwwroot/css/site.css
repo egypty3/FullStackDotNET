@@ -1,0 +1,333 @@
+/* ===== ShopNow Custom Theme ===== */
+:root {
+    --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --card-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    --card-hover-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+    --nav-bg: linear-gradient(135deg, #1e1e2f 0%, #2d2d44 100%);
+}
+
+* { font-family: 'Inter', sans-serif; }
+
+body {
+    background-color: #f4f6f9;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+main.container { flex: 1; }
+
+/* ===== Navbar ===== */
+.navbar {
+    background: var(--nav-bg);
+    box-shadow: 0 2px 20px rgba(0, 0, 0, 0.15);
+    padding: 0.8rem 0;
+}
+
+.navbar-brand {
+    font-size: 1.4rem;
+    letter-spacing: -0.5px;
+}
+
+.navbar-brand i { color: #667eea; }
+
+.navbar .nav-link {
+    color: rgba(255,255,255,0.8) !important;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    border-radius: 8px;
+    padding: 0.5rem 1rem !important;
+    margin: 0 2px;
+}
+
+.navbar .nav-link:hover {
+    color: #fff !important;
+    background: rgba(255,255,255,0.1);
+    transform: translateY(-1px);
+}
+
+/* ===== Hero Section ===== */
+.hero-section {
+    background: var(--primary-gradient);
+    border-radius: 20px;
+    padding: 3rem;
+    color: white;
+    margin-bottom: 1rem;
+}
+
+.hero-section .lead { color: rgba(255,255,255,0.85); }
+.hero-section strong { color: #fff; }
+
+.text-gradient {
+    background: linear-gradient(135deg, #ffd700, #ff6b6b);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.hero-section .btn-primary {
+    background: rgba(255,255,255,0.2);
+    border: 2px solid white;
+    font-weight: 600;
+}
+
+.hero-section .btn-primary:hover {
+    background: white;
+    color: #667eea;
+}
+
+.hero-section .btn-outline-secondary {
+    border-color: rgba(255,255,255,0.5);
+    color: white;
+}
+
+.hero-section .btn-outline-secondary:hover {
+    background: rgba(255,255,255,0.15);
+    border-color: white;
+    color: white;
+}
+
+/* ===== Cards ===== */
+.card {
+    border: none;
+    border-radius: 16px;
+    box-shadow: var(--card-shadow);
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+    box-shadow: var(--card-hover-shadow);
+    transform: translateY(-3px);
+}
+
+.card-header {
+    border-radius: 16px 16px 0 0 !important;
+    border-bottom: 1px solid rgba(0,0,0,0.06);
+    padding: 1rem 1.25rem;
+}
+
+/* ===== Stat Cards ===== */
+.stat-card {
+    border-left: 4px solid transparent;
+    overflow: hidden;
+}
+
+.stat-card:nth-child(1) .card { border-left-color: var(--bs-primary); }
+.stat-card:nth-child(2) .card { border-left-color: var(--bs-success); }
+.stat-card:nth-child(3) .card { border-left-color: var(--bs-warning); }
+.stat-card:nth-child(4) .card { border-left-color: var(--bs-info); }
+
+.stat-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+}
+
+/* ===== Feature Cards ===== */
+.feature-card .feature-icon {
+    width: 56px;
+    height: 56px;
+    background: linear-gradient(135deg, rgba(102,126,234,0.1), rgba(118,75,162,0.1));
+    border-radius: 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* ===== Product Cards ===== */
+.product-card {
+    overflow: hidden;
+}
+
+.product-card:hover {
+    border-color: #667eea;
+}
+
+.product-card .card-footer {
+    padding: 0.5rem 1rem;
+}
+
+/* ===== Form Styles ===== */
+.form-control, .form-select {
+    border-radius: 10px;
+    border: 1px solid #dee2e6;
+    padding: 0.6rem 1rem;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.2rem rgba(102,126,234,0.25);
+}
+
+.form-control-lg {
+    padding: 0.8rem 1.2rem;
+    font-size: 1rem;
+}
+
+/* ===== Buttons ===== */
+.btn {
+    border-radius: 10px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn:hover { transform: translateY(-1px); }
+
+.btn-primary {
+    background: var(--primary-gradient);
+    border: none;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #5a6fd6 0%, #6a4190 100%);
+    box-shadow: 0 4px 15px rgba(102,126,234,0.4);
+}
+
+/* ===== DataTables overrides ===== */
+.dataTables_wrapper .dataTables_filter input {
+    border-radius: 20px !important;
+    padding: 0.4rem 1rem !important;
+    border: 1px solid #dee2e6 !important;
+}
+
+.dataTables_wrapper .dataTables_filter input:focus {
+    border-color: #667eea !important;
+    box-shadow: 0 0 0 0.2rem rgba(102,126,234,0.25) !important;
+}
+
+table.dataTable thead th {
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    letter-spacing: 0.5px;
+    color: #6c757d;
+    border-bottom: 2px solid #e9ecef;
+}
+
+/* ===== Badges ===== */
+.badge {
+    font-weight: 500;
+    padding: 0.4em 0.8em;
+    border-radius: 8px;
+}
+
+/* ===== Modals ===== */
+.modal-content {
+    border: none;
+    border-radius: 16px;
+    overflow: hidden;
+}
+
+.modal-header {
+    background: var(--primary-gradient);
+    border: none;
+    padding: 1.2rem 1.5rem;
+}
+
+.modal-header.bg-primary { background: var(--primary-gradient) !important; }
+
+.modal-header.bg-success {
+    background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%) !important;
+}
+
+/* ===== Footer ===== */
+footer {
+    background: #fff;
+    border-top: 1px solid rgba(0,0,0,0.06);
+}
+
+/* ===== SweetAlert2 theme ===== */
+.swal2-popup { border-radius: 16px !important; }
+.swal2-confirm { border-radius: 10px !important; }
+.swal2-cancel { border-radius: 10px !important; }
+
+/* ===== Scrollbar ===== */
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: #f1f1f1; }
+::-webkit-scrollbar-thumb { background: #c1c1c1; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #a8a8a8; }
+
+/* ===== Spinner override ===== */
+.spinner-border-sm { width: 1rem; height: 1rem; }
+}
+
+/* ===== Store Hero ===== */
+.store-hero {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f64f59 100%);
+    border-radius: 24px;
+    padding: 3.5rem;
+    color: white;
+    position: relative;
+    overflow: hidden;
+}
+
+.store-hero::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -20%;
+    width: 500px;
+    height: 500px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 50%;
+}
+
+.store-hero::after {
+    content: '';
+    position: absolute;
+    bottom: -30%;
+    left: -10%;
+    width: 300px;
+    height: 300px;
+    background: rgba(255,255,255,0.03);
+    border-radius: 50%;
+}
+
+.store-hero-highlight {
+    background: linear-gradient(135deg, #ffd700, #ff6b6b, #ffd700);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.fw-800 { font-weight: 800; }
+
+/* ===== Product Card Store ===== */
+.product-card {
+    transition: all 0.3s ease;
+    overflow: hidden;
+}
+
+.product-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.12) !important;
+}
+
+.product-card .card-img-top {
+    transition: all 0.3s ease;
+}
+
+.product-card:hover .card-img-top {
+    background: linear-gradient(135deg, #e9ecef, #dee2e6) !important;
+}
+
+.product-card:hover .card-img-top i {
+    opacity: 0.35 !important;
+    transform: scale(1.1);
+    transition: all 0.3s ease;
+}
+
+/* ===== Category Pills ===== */
+.category-filter {
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.category-filter:hover {
+    transform: translateY(-2px);
+}

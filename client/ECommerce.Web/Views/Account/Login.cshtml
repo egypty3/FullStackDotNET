@@ -1,0 +1,107 @@
+@{
+    ViewData["Title"] = "Login";
+}
+
+<div class="row justify-content-center animate__animated animate__fadeIn">
+    <div class="col-md-5 col-lg-4">
+        <div class="card shadow-lg border-0 mt-5">
+            <div class="card-body p-5">
+                <div class="text-center mb-4">
+                    <i class="fas fa-user-circle fa-4x text-primary mb-3"></i>
+                    <h3 class="fw-bold">Welcome Back</h3>
+                    <p class="text-muted">Sign in to your account</p>
+                </div>
+                <form id="loginForm" onsubmit="return handleLogin(event)">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">
+                            <i class="fas fa-envelope me-1"></i>Email
+                        </label>
+                        <input type="email" class="form-control form-control-lg" id="loginEmail"
+                               placeholder="you@example.com" required />
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">
+                            <i class="fas fa-lock me-1"></i>Password
+                        </label>
+                        <div class="input-group">
+                            <input type="password" class="form-control form-control-lg" id="loginPassword"
+                                   placeholder="Enter password" required />
+                            <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('loginPassword', this)">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-lg w-100 mb-3" id="loginBtn">
+                        <i class="fas fa-sign-in-alt me-2"></i>Sign In
+                    </button>
+                </form>
+                <div class="text-center">
+                    <p class="text-muted mb-1">Don't have an account?</p>
+                    <a asp-controller="Account" asp-action="Register" class="fw-semibold text-decoration-none">
+                        <i class="fas fa-user-plus me-1"></i>Create one here
+                    </a>
+                </div>
+                <hr />
+                <div class="text-center">
+                    <small class="text-muted">
+                        <i class="fas fa-info-circle me-1"></i>Demo: admin@ecommerce.com / Admin@@123456
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+function handleLogin(e) {
+    e.preventDefault();
+    var btn = $('#loginBtn');
+    btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2"></span>Signing in...');
+
+    var payload = {
+        email: $('#loginEmail').val(),
+        password: $('#loginPassword').val()
+    };
+
+    $.ajax({
+        url: API_BASE + '/api/auth/login',
+        method: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify(payload),
+        success: function (res) {
+            if (res.token) {
+                localStorage.setItem('jwt_token', res.token);
+                localStorage.setItem('user_email', payload.email);
+                localStorage.setItem('user_name', payload.email.split('@@')[0]);
+                Swal.fire({
+                    title: 'Welcome!',
+                    text: 'You have signed in successfully.',
+                    icon: 'success',
+                    timer: 1500,
+                    showConfirmButton: false
+                }).then(function () {
+                    // Redirect to returnUrl if specified, otherwise admin dashboard
+                    var params = new URLSearchParams(window.location.search);
+                    var returnUrl = params.get('returnUrl');
+                    window.location.href = returnUrl || '/Admin/Dashboard';
+                });
+            } else {
+                toastError(res.error || 'Login failed.');
+                btn.prop('disabled', false).html('<i class="fas fa-sign-in-alt me-2"></i>Sign In');
+            }
+        },
+        error: function (xhr) {
+            var msg = 'Login failed.';
+            if (xhr.responseJSON) {
+                msg = xhr.responseJSON.error || xhr.responseJSON.title || msg;
+            }
+            toastError(msg);
+            btn.prop('disabled', false).html('<i class="fas fa-sign-in-alt me-2"></i>Sign In');
+        }
+    });
+
+    return false;
+}
+</script>
+}

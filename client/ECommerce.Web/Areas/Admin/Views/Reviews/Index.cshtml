@@ -1,0 +1,241 @@
+@{
+    ViewData["Title"] = "Reviews";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4 animate__animated animate__fadeIn">
+    <div>
+        <h2 class="fw-bold mb-1"><i class="fas fa-star me-2 text-primary"></i>Reviews</h2>
+        <p class="text-muted mb-0">Manage product reviews</p>
+    </div>
+    <button class="btn btn-primary" onclick="showCreateReviewModal()">
+        <i class="fas fa-plus me-2"></i>Add Review
+    </button>
+</div>
+
+<!-- Stats Row -->
+<div class="row g-4 mb-4 animate__animated animate__fadeInUp">
+    <div class="col-md-3">
+        <div class="card shadow-sm border-0" style="border-left: 4px solid var(--bs-primary) !important;">
+            <div class="card-body text-center">
+                <i class="fas fa-star fa-2x text-primary mb-2"></i>
+                <h3 class="fw-bold" id="stat-total">0</h3>
+                <p class="text-muted mb-0">Total Reviews</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card shadow-sm border-0" style="border-left: 4px solid var(--bs-success) !important;">
+            <div class="card-body text-center">
+                <i class="fas fa-check fa-2x text-success mb-2"></i>
+                <h3 class="fw-bold" id="stat-approved">0</h3>
+                <p class="text-muted mb-0">Approved</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card shadow-sm border-0" style="border-left: 4px solid var(--bs-warning) !important;">
+            <div class="card-body text-center">
+                <i class="fas fa-clock fa-2x text-warning mb-2"></i>
+                <h3 class="fw-bold" id="stat-pending">0</h3>
+                <p class="text-muted mb-0">Pending</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card shadow-sm border-0" style="border-left: 4px solid var(--bs-info) !important;">
+            <div class="card-body text-center">
+                <i class="fas fa-star-half-alt fa-2x text-info mb-2"></i>
+                <h3 class="fw-bold" id="stat-avg-rating">0</h3>
+                <p class="text-muted mb-0">Avg Rating</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Reviews Table -->
+<div class="card shadow-sm animate__animated animate__fadeInUp">
+    <div class="card-header bg-white">
+        <h5 class="mb-0"><i class="fas fa-list me-2"></i>Review List</h5>
+    </div>
+    <div class="card-body">
+        <table id="reviewsTable" class="table table-hover w-100">
+            <thead>
+                <tr>
+                    <th>Product</th>
+                    <th>Customer</th>
+                    <th>Rating</th>
+                    <th>Title</th>
+                    <th>Status</th>
+                    <th>Date</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Create Review Modal -->
+<div class="modal fade" id="reviewModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title"><i class="fas fa-plus me-2"></i>Add Review</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="reviewForm">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Product *</label>
+                        <select class="form-select" id="reviewProductId" required>
+                            <option value="">Select product...</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Customer *</label>
+                        <select class="form-select" id="reviewCustomerId" required>
+                            <option value="">Select customer...</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Rating *</label>
+                        <select class="form-select" id="reviewRating" required>
+                            <option value="">Select rating...</option>
+                            <option value="5">⭐⭐⭐⭐⭐ (5)</option>
+                            <option value="4">⭐⭐⭐⭐ (4)</option>
+                            <option value="3">⭐⭐⭐ (3)</option>
+                            <option value="2">⭐⭐ (2)</option>
+                            <option value="1">⭐ (1)</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Title *</label>
+                        <input type="text" class="form-control" id="reviewTitle" maxlength="200" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Comment *</label>
+                        <textarea class="form-control" id="reviewComment" rows="3" required></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i class="fas fa-times me-1"></i>Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="saveReview()"><i class="fas fa-save me-1"></i>Submit Review</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+var reviewsTable;
+var allReviews = [];
+
+$(function () { loadReviews(); });
+
+function loadReviews() {
+    apiGet('/api/reviews', function (data) {
+        allReviews = data;
+        var approved = data.filter(function (r) { return r.isApproved; }).length;
+        var avgRating = data.length > 0 ? (data.reduce(function (s, r) { return s + r.rating; }, 0) / data.length).toFixed(1) : '0';
+        $('#stat-total').text(data.length);
+        $('#stat-approved').text(approved);
+        $('#stat-pending').text(data.length - approved);
+        $('#stat-avg-rating').text(avgRating);
+        initReviewsTable(data);
+    });
+}
+
+function renderStars(rating) {
+    var html = '';
+    for (var i = 1; i <= 5; i++) {
+        html += '<i class="fas fa-star ' + (i <= rating ? 'text-warning' : 'text-muted') + '"></i>';
+    }
+    return html;
+}
+
+function initReviewsTable(data) {
+    if (reviewsTable) { reviewsTable.clear().rows.add(data).draw(); return; }
+    var isAuth = !!localStorage.getItem('jwt_token');
+    var columns = [
+        { data: 'productName', render: function (d) { return '<i class="fas fa-box me-1 text-primary"></i>' + escapeHtml(d); } },
+        { data: 'customerName', render: function (d) { return '<i class="fas fa-user me-1 text-muted"></i>' + escapeHtml(d); } },
+        { data: 'rating', render: function (d) { return renderStars(d) + ' <small>(' + d + ')</small>'; } },
+        { data: 'title', render: function (d) { return escapeHtml(d); } },
+        { data: 'isApproved', render: function (d) { return d ? '<span class="badge bg-success"><i class="fas fa-check me-1"></i>Approved</span>' : '<span class="badge bg-warning text-dark"><i class="fas fa-clock me-1"></i>Pending</span>'; } },
+        { data: 'createdAt', render: function (d) { return new Date(d).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }); } }
+    ];
+    if (isAuth) {
+        columns.push({ data: null, orderable: false, render: function (d, t, row) {
+            var btns = '<div class="btn-group btn-group-sm">';
+            if (!row.isApproved) btns += '<button class="btn btn-outline-success" title="Approve" onclick="approveReview(\'' + row.id + '\')"><i class="fas fa-check"></i></button>';
+            btns += '<button class="btn btn-outline-danger" title="Delete" onclick="deleteReview(\'' + row.id + '\')"><i class="fas fa-trash"></i></button></div>';
+            return btns;
+        }});
+    }
+    reviewsTable = $('#reviewsTable').DataTable({ data: data, columns: columns, responsive: true, pageLength: 10,
+        language: { emptyTable: '<div class="text-center py-4"><i class="fas fa-star fa-3x text-muted mb-3"></i><p class="text-muted">No reviews found</p></div>', search: '<i class="fas fa-search"></i>', searchPlaceholder: 'Search reviews...' },
+        dom: '<"row"<"col-sm-6"l><"col-sm-6"f>>rtip'
+    });
+}
+
+function showCreateReviewModal() {
+    $('#reviewForm')[0].reset();
+    apiGet('/api/products', function (products) {
+        var html = '<option value="">Select product...</option>';
+        products.forEach(function (p) { html += '<option value="' + p.id + '">' + escapeHtml(p.name) + '</option>'; });
+        $('#reviewProductId').html(html);
+    });
+    apiGet('/api/customers', function (customers) {
+        var html = '<option value="">Select customer...</option>';
+        customers.filter(function (c) { return c.isActive; }).forEach(function (c) {
+            html += '<option value="' + c.id + '">' + escapeHtml(c.firstName + ' ' + c.lastName) + '</option>';
+        });
+        $('#reviewCustomerId').html(html);
+    });
+    new bootstrap.Modal('#reviewModal').show();
+}
+
+function saveReview() {
+    var payload = {
+        productId: $('#reviewProductId').val(),
+        customerId: $('#reviewCustomerId').val(),
+        rating: parseInt($('#reviewRating').val()) || 0,
+        title: $('#reviewTitle').val(),
+        comment: $('#reviewComment').val()
+    };
+    if (!payload.productId || !payload.customerId || !payload.rating || !payload.title || !payload.comment) { return toastError('All fields are required.'); }
+    apiRequest('POST', '/api/reviews', payload, function () {
+        bootstrap.Modal.getInstance(document.getElementById('reviewModal')).hide();
+        toastSuccess('Review submitted successfully!');
+        loadReviews();
+    });
+}
+
+function approveReview(id) {
+    Swal.fire({ title: 'Approve Review?', text: 'This will make the review visible to all users.', icon: 'question', showCancelButton: true,
+        confirmButtonText: '<i class="fas fa-check me-1"></i>Approve', cancelButtonText: 'Cancel'
+    }).then(function (result) {
+        if (result.isConfirmed) {
+            apiRequest('POST', '/api/reviews/' + id + '/approve', null, function () {
+                toastSuccess('Review approved!');
+                loadReviews();
+            });
+        }
+    });
+}
+
+function deleteReview(id) {
+    Swal.fire({ title: 'Delete Review?', text: 'This will permanently remove the review.', icon: 'warning', showCancelButton: true,
+        confirmButtonColor: '#dc3545', confirmButtonText: '<i class="fas fa-trash me-1"></i>Delete', cancelButtonText: 'Cancel'
+    }).then(function (result) {
+        if (result.isConfirmed) {
+            apiRequest('DELETE', '/api/reviews/' + id, null, function () {
+                toastSuccess('Review deleted!');
+                loadReviews();
+            });
+        }
+    });
+}
+</script>
+}

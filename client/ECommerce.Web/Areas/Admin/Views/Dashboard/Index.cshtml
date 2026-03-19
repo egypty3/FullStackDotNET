@@ -1,0 +1,239 @@
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<!-- Welcome Banner -->
+<div class="hero-section animate__animated animate__fadeIn">
+    <div class="row align-items-center">
+        <div class="col-lg-8">
+            <h1 class="display-5 fw-bold mb-2">
+                <i class="fas fa-tachometer-alt me-2"></i>Admin Dashboard
+            </h1>
+            <p class="lead mb-0" style="color:rgba(255,255,255,0.85);">
+                Welcome back! Here's an overview of your store.
+            </p>
+        </div>
+        <div class="col-lg-4 text-end d-none d-lg-block">
+            <i class="fas fa-chart-line fa-5x" style="color:rgba(255,255,255,0.15);"></i>
+        </div>
+    </div>
+</div>
+
+<!-- Stats Cards Row 1 -->
+<div class="row g-4 mt-3 animate__animated animate__fadeInUp">
+    <div class="col-md-3 col-sm-6">
+        <a asp-area="Admin" asp-controller="Products" asp-action="Index" class="text-decoration-none">
+            <div class="stat-card card h-100" style="cursor:pointer;transition:transform .2s;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform=''">
+                <div class="card-body text-center">
+                    <div class="stat-icon bg-primary-subtle text-primary">
+                        <i class="fas fa-box fa-2x"></i>
+                    </div>
+                    <h3 class="fw-bold mt-3" id="stat-products">
+                        <div class="spinner-border spinner-border-sm" role="status"></div>
+                    </h3>
+                    <p class="text-muted mb-0">Products</p>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="col-md-3 col-sm-6">
+        <a asp-area="Admin" asp-controller="Categories" asp-action="Index" class="text-decoration-none">
+            <div class="stat-card card h-100" style="cursor:pointer;transition:transform .2s;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform=''">
+                <div class="card-body text-center">
+                    <div class="stat-icon bg-success-subtle text-success">
+                        <i class="fas fa-tags fa-2x"></i>
+                    </div>
+                    <h3 class="fw-bold mt-3" id="stat-categories">
+                        <div class="spinner-border spinner-border-sm" role="status"></div>
+                    </h3>
+                    <p class="text-muted mb-0">Categories</p>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="col-md-3 col-sm-6">
+        <a asp-area="Admin" asp-controller="Customers" asp-action="Index" class="text-decoration-none">
+            <div class="stat-card card h-100" style="cursor:pointer;transition:transform .2s;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform=''">
+                <div class="card-body text-center">
+                    <div class="stat-icon bg-info-subtle text-info">
+                        <i class="fas fa-users fa-2x"></i>
+                    </div>
+                    <h3 class="fw-bold mt-3" id="stat-customers">
+                        <div class="spinner-border spinner-border-sm" role="status"></div>
+                    </h3>
+                    <p class="text-muted mb-0">Customers</p>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="col-md-3 col-sm-6">
+        <a asp-area="Admin" asp-controller="Orders" asp-action="Index" class="text-decoration-none">
+            <div class="stat-card card h-100" style="cursor:pointer;transition:transform .2s;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform=''">
+                <div class="card-body text-center">
+                    <div class="stat-icon bg-warning-subtle text-warning">
+                        <i class="fas fa-shopping-cart fa-2x"></i>
+                    </div>
+                    <h3 class="fw-bold mt-3" id="stat-orders">
+                        <div class="spinner-border spinner-border-sm" role="status"></div>
+                    </h3>
+                    <p class="text-muted mb-0">Orders</p>
+                </div>
+            </div>
+        </a>
+    </div>
+</div>
+
+<!-- Stats Cards Row 2 -->
+<div class="row g-4 mt-2 animate__animated animate__fadeInUp" style="animation-delay: 0.15s;">
+    <div class="col-md-3 col-sm-6">
+        <a asp-area="Admin" asp-controller="Employees" asp-action="Index" class="text-decoration-none">
+            <div class="stat-card card h-100" style="cursor:pointer;transition:transform .2s;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform=''">
+                <div class="card-body text-center">
+                    <div class="stat-icon bg-danger-subtle text-danger">
+                        <i class="fas fa-user-tie fa-2x"></i>
+                    </div>
+                    <h3 class="fw-bold mt-3" id="stat-employees">
+                        <div class="spinner-border spinner-border-sm" role="status"></div>
+                    </h3>
+                    <p class="text-muted mb-0">Employees</p>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="col-md-3 col-sm-6">
+        <a asp-area="Admin" asp-controller="Shippers" asp-action="Index" class="text-decoration-none">
+            <div class="stat-card card h-100" style="cursor:pointer;transition:transform .2s;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform=''">
+                <div class="card-body text-center">
+                    <div class="stat-icon bg-primary-subtle text-primary">
+                        <i class="fas fa-truck fa-2x"></i>
+                    </div>
+                    <h3 class="fw-bold mt-3" id="stat-shippers">
+                        <div class="spinner-border spinner-border-sm" role="status"></div>
+                    </h3>
+                    <p class="text-muted mb-0">Shippers</p>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="col-md-3 col-sm-6">
+        <a asp-area="Admin" asp-controller="Reviews" asp-action="Index" class="text-decoration-none">
+            <div class="stat-card card h-100" style="cursor:pointer;transition:transform .2s;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform=''">
+                <div class="card-body text-center">
+                    <div class="stat-icon bg-success-subtle text-success">
+                        <i class="fas fa-star fa-2x"></i>
+                    </div>
+                    <h3 class="fw-bold mt-3" id="stat-reviews">
+                        <div class="spinner-border spinner-border-sm" role="status"></div>
+                    </h3>
+                    <p class="text-muted mb-0">Reviews</p>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="col-md-3 col-sm-6">
+        <a asp-area="Admin" asp-controller="Coupons" asp-action="Index" class="text-decoration-none">
+            <div class="stat-card card h-100" style="cursor:pointer;transition:transform .2s;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform=''">
+                <div class="card-body text-center">
+                    <div class="stat-icon bg-info-subtle text-info">
+                        <i class="fas fa-ticket-alt fa-2x"></i>
+                    </div>
+                    <h3 class="fw-bold mt-3" id="stat-coupons">
+                        <div class="spinner-border spinner-border-sm" role="status"></div>
+                    </h3>
+                    <p class="text-muted mb-0">Coupons</p>
+                </div>
+            </div>
+        </a>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="row g-4 mt-3 animate__animated animate__fadeInUp" style="animation-delay: 0.3s;">
+    <div class="col-md-4">
+        <div class="card feature-card h-100">
+            <div class="card-body">
+                <div class="feature-icon text-primary">
+                    <i class="fas fa-layer-group fa-2x"></i>
+                </div>
+                <h5 class="fw-bold mt-3">Clean Architecture</h5>
+                <p class="text-muted">Domain, Application, Infrastructure, and API layers with proper dependency inversion.</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card feature-card h-100">
+            <div class="card-body">
+                <div class="feature-icon text-success">
+                    <i class="fas fa-shield-alt fa-2x"></i>
+                </div>
+                <h5 class="fw-bold mt-3">SOLID Principles</h5>
+                <p class="text-muted">Single Responsibility, Open/Closed, Liskov, Interface Segregation, Dependency Inversion.</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card feature-card h-100">
+            <div class="card-body">
+                <div class="feature-icon text-warning">
+                    <i class="fas fa-exchange-alt fa-2x"></i>
+                </div>
+                <h5 class="fw-bold mt-3">CQRS with MediatR</h5>
+                <p class="text-muted">Command Query Responsibility Segregation for clean separation of reads and writes.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+$(function () {
+    apiGet('/api/products', function (products) {
+        $('#stat-products').text(products.length);
+    }, function () {
+        $('#stat-products').text('--');
+    });
+
+    apiGet('/api/categories', function (categories) {
+        $('#stat-categories').text(categories.length);
+    }, function () {
+        $('#stat-categories').text('--');
+    });
+
+    apiGet('/api/customers', function (customers) {
+        $('#stat-customers').text(customers.length);
+    }, function () {
+        $('#stat-customers').text('--');
+    });
+
+    apiGet('/api/reviews', function (reviews) {
+        $('#stat-reviews').text(reviews.length);
+    }, function () {
+        $('#stat-reviews').text('--');
+    });
+
+    apiGet('/api/orders/my', function (orders) {
+        $('#stat-orders').text(orders.length);
+    }, function () {
+        $('#stat-orders').text('0');
+    });
+
+    apiGet('/api/employees', function (employees) {
+        $('#stat-employees').text(employees.length);
+    }, function () {
+        $('#stat-employees').text('--');
+    });
+
+    apiGet('/api/shippers', function (shippers) {
+        $('#stat-shippers').text(shippers.length);
+    }, function () {
+        $('#stat-shippers').text('--');
+    });
+
+    apiGet('/api/coupons', function (coupons) {
+        $('#stat-coupons').text(coupons.length);
+    }, function () {
+        $('#stat-coupons').text('--');
+    });
+});
+</script>
+}

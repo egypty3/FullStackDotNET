@@ -1,0 +1,169 @@
+@{
+    ViewData["Title"] = "My Orders";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4 animate__animated animate__fadeIn">
+    <div>
+        <h2 class="fw-bold mb-1"><i class="fas fa-shopping-cart me-2 text-primary"></i>My Orders</h2>
+        <p class="text-muted mb-0">Track and manage your orders</p>
+    </div>
+    <a asp-controller="Products" asp-action="Index" class="btn btn-primary">
+        <i class="fas fa-plus me-2"></i>New Order
+    </a>
+</div>
+
+<div id="no-auth-msg" class="text-center py-5 animate__animated animate__fadeIn" style="display:none;">
+    <i class="fas fa-lock fa-4x text-muted mb-3"></i>
+    <h4 class="text-muted">Please login to view your orders</h4>
+    <a asp-controller="Account" asp-action="Login" class="btn btn-primary mt-3">
+        <i class="fas fa-sign-in-alt me-2"></i>Login
+    </a>
+</div>
+
+<div class="card shadow-sm animate__animated animate__fadeInUp" id="orders-section" style="display:none;">
+    <div class="card-header bg-white">
+        <h5 class="mb-0"><i class="fas fa-list me-2"></i>Order History</h5>
+    </div>
+    <div class="card-body">
+        <table id="ordersTable" class="table table-hover w-100">
+            <thead>
+                <tr>
+                    <th>Order ID</th>
+                    <th>Date</th>
+                    <th>Items</th>
+                    <th>Total</th>
+                    <th>Status</th>
+                    <th>Payment</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Order Detail Modal -->
+<div class="modal fade" id="orderDetailModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title"><i class="fas fa-receipt me-2"></i>Order Details</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="orderDetailBody">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+var ordersTable;
+var statusColorMap = { 'Pending':'warning', 'Confirmed':'info', 'Processing':'primary', 'Shipped':'secondary', 'Delivered':'success', 'Cancelled':'danger' };
+var paymentColorMap = { 'Pending':'warning', 'Paid':'success', 'Refunded':'info', 'Failed':'danger' };
+
+$(function () {
+    var token = localStorage.getItem('jwt_token');
+    if (!token) {
+        $('#no-auth-msg').show();
+        return;
+    }
+    $('#orders-section').show();
+    loadOrders();
+});
+
+function loadOrders() {
+    apiGet('/api/orders/my', function (data) {
+        initOrdersTable(data);
+    }, function () {
+        $('#no-auth-msg').show();
+        $('#orders-section').hide();
+    });
+}
+
+function initOrdersTable(data) {
+    if (ordersTable) {
+        ordersTable.clear().rows.add(data).draw();
+        return;
+    }
+    ordersTable = $('#ordersTable').DataTable({
+        data: data,
+        order: [[1, 'desc']],
+        columns: [
+            { data: 'id', render: function(d) { return '<code class="small">' + d.substring(0,8) + '...</code>'; } },
+            { data: 'createdAt', render: function(d) { return new Date(d).toLocaleDateString('en-US', { year:'numeric', month:'short', day:'numeric', hour:'2-digit', minute:'2-digit' }); } },
+            { data: 'items', render: function(d) { return '<span class="badge bg-primary">' + d.length + ' item(s)</span>'; } },
+            { data: 'totalAmount', render: function(d) { return '<span class="fw-bold text-success">$' + d.toFixed(2) + '</span>'; } },
+            { data: 'status', render: function(d) { return '<span class="badge bg-' + (statusColorMap[d] || 'secondary') + '">' + escapeHtml(d) + '</span>'; } },
+            { data: 'paymentStatus', render: function(d) { return '<span class="badge bg-' + (paymentColorMap[d] || 'secondary') + '">' + escapeHtml(d) + '</span>'; } },
+            { data: null, orderable: false, render: function(d, t, row) {
+                var btns = '<div class="btn-group btn-group-sm">';
+                btns += '<button class="btn btn-outline-primary" title="View" onclick="viewOrder(\'' + row.id + '\')"><i class="fas fa-eye"></i></button>';
+                if (row.status === 'Pending') {
+                    btns += '<button class="btn btn-outline-danger" title="Cancel" onclick="cancelOrder(\'' + row.id + '\')"><i class="fas fa-times"></i></button>';
+                }
+                btns += '</div>';
+                return btns;
+            }}
+        ],
+        language: {
+            emptyTable: '<div class="text-center py-4"><i class="fas fa-shopping-bag fa-3x text-muted mb-3"></i><p class="text-muted">No orders yet</p></div>',
+            search: '<i class="fas fa-search"></i>',
+            searchPlaceholder: 'Search orders...'
+        }
+    });
+}
+
+function viewOrder(id) {
+    apiGet('/api/orders/' + id, function (order) {
+        var html = '<div class="row g-3">';
+        html += '<div class="col-md-6"><strong>Order ID:</strong> <code>' + order.id + '</code></div>';
+        html += '<div class="col-md-6"><strong>Date:</strong> ' + new Date(order.createdAt).toLocaleString() + '</div>';
+        html += '<div class="col-md-6"><strong>Status:</strong> <span class="badge bg-' + (statusColorMap[order.status] || 'secondary') + '">' + escapeHtml(order.status) + '</span></div>';
+        html += '<div class="col-md-6"><strong>Payment:</strong> <span class="badge bg-' + (paymentColorMap[order.paymentStatus] || 'secondary') + '">' + escapeHtml(order.paymentStatus) + '</span></div>';
+        if (order.shippingStreet) {
+            html += '<div class="col-12"><strong>Shipping:</strong> ' +
+                escapeHtml(order.shippingStreet) + ', ' +
+                escapeHtml(order.shippingCity) + ', ' +
+                escapeHtml(order.shippingState) + ' ' +
+                escapeHtml(order.shippingZipCode) + ', ' +
+                escapeHtml(order.shippingCountry) + '</div>';
+        }
+        html += '</div><hr/>';
+        html += '<h6 class="fw-bold">Items</h6>';
+        html += '<table class="table table-sm"><thead><tr><th>Product</th><th>Qty</th><th>Price</th><th>Subtotal</th></tr></thead><tbody>';
+        order.items.forEach(function (item) {
+            html += '<tr><td>' + escapeHtml(item.productName) + '</td><td>' + item.quantity + '</td>';
+            html += '<td>$' + item.unitPrice.toFixed(2) + '</td>';
+            html += '<td class="fw-bold">$' + item.subtotal.toFixed(2) + '</td></tr>';
+        });
+        html += '</tbody></table>';
+        html += '<div class="text-end"><h5 class="fw-bold text-success">Total: $' + order.totalAmount.toFixed(2) + '</h5></div>';
+        $('#orderDetailBody').html(html);
+        new bootstrap.Modal('#orderDetailModal').show();
+    });
+}
+
+function cancelOrder(id) {
+    Swal.fire({
+        title: 'Cancel Order?',
+        text: 'This will cancel the order and restore stock.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#dc3545',
+        confirmButtonText: '<i class="fas fa-times me-1"></i>Yes, cancel it!',
+        cancelButtonText: 'No, keep it'
+    }).then(function (result) {
+        if (result.isConfirmed) {
+            apiRequest('POST', '/api/orders/' + id + '/cancel', null, function () {
+                toastSuccess('Order cancelled successfully!');
+                loadOrders();
+            });
+        }
+    });
+}
+</script>
+}

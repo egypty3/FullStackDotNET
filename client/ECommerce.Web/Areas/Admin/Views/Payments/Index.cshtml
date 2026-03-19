@@ -1,0 +1,201 @@
+@{
+    ViewData["Title"] = "Payments";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4 animate__animated animate__fadeIn">
+    <div>
+        <h2 class="fw-bold mb-1"><i class="fas fa-credit-card me-2 text-primary"></i>Payments</h2>
+        <p class="text-muted mb-0">Track payment transactions</p>
+    </div>
+    <button class="btn btn-primary" onclick="showCreatePaymentModal()">
+        <i class="fas fa-plus me-2"></i>New Payment
+    </button>
+</div>
+
+<!-- Stats Row -->
+<div class="row g-4 mb-4 animate__animated animate__fadeInUp">
+    <div class="col-md-3">
+        <div class="card shadow-sm border-0" style="border-left: 4px solid var(--bs-primary) !important;">
+            <div class="card-body text-center">
+                <i class="fas fa-receipt fa-2x text-primary mb-2"></i>
+                <h3 class="fw-bold" id="stat-total">0</h3>
+                <p class="text-muted mb-0">Total Payments</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card shadow-sm border-0" style="border-left: 4px solid var(--bs-success) !important;">
+            <div class="card-body text-center">
+                <i class="fas fa-check-circle fa-2x text-success mb-2"></i>
+                <h3 class="fw-bold" id="stat-completed">0</h3>
+                <p class="text-muted mb-0">Completed</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card shadow-sm border-0" style="border-left: 4px solid var(--bs-warning) !important;">
+            <div class="card-body text-center">
+                <i class="fas fa-clock fa-2x text-warning mb-2"></i>
+                <h3 class="fw-bold" id="stat-pending">0</h3>
+                <p class="text-muted mb-0">Pending</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card shadow-sm border-0" style="border-left: 4px solid var(--bs-info) !important;">
+            <div class="card-body text-center">
+                <i class="fas fa-dollar-sign fa-2x text-info mb-2"></i>
+                <h3 class="fw-bold" id="stat-total-amount">$0</h3>
+                <p class="text-muted mb-0">Total Amount</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Payment Table -->
+<div class="card shadow-sm animate__animated animate__fadeInUp">
+    <div class="card-header bg-white">
+        <h5 class="mb-0"><i class="fas fa-list me-2"></i>Payment List</h5>
+    </div>
+    <div class="card-body">
+        <table id="paymentsTable" class="table table-hover w-100">
+            <thead>
+                <tr>
+                    <th>Transaction ID</th>
+                    <th>Method</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                    <th>Paid At</th>
+                    <th>Created</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Create Payment Modal -->
+<div class="modal fade" id="paymentModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title"><i class="fas fa-plus me-2"></i>New Payment</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="paymentForm">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Order ID *</label>
+                        <input type="text" class="form-control" id="paymentOrderId" required placeholder="Enter Order GUID" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Amount *</label>
+                        <div class="input-group"><span class="input-group-text">$</span><input type="number" class="form-control" id="paymentAmount" min="0.01" step="0.01" required /></div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Payment Method *</label>
+                        <select class="form-select" id="paymentMethod" required>
+                            <option value="">Select method...</option>
+                            <option value="CreditCard">Credit Card</option>
+                            <option value="DebitCard">Debit Card</option>
+                            <option value="PayPal">PayPal</option>
+                            <option value="BankTransfer">Bank Transfer</option>
+                            <option value="CashOnDelivery">Cash on Delivery</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Transaction ID</label>
+                        <input type="text" class="form-control" id="paymentTransactionId" placeholder="Optional" />
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i class="fas fa-times me-1"></i>Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="savePayment()"><i class="fas fa-save me-1"></i>Create Payment</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+var paymentsTable;
+var allPayments = [];
+var methodIcons = { 'CreditCard': 'fa-credit-card', 'DebitCard': 'fa-credit-card', 'PayPal': 'fa-paypal', 'BankTransfer': 'fa-university', 'CashOnDelivery': 'fa-money-bill' };
+var statusColors = { 'Pending': 'warning', 'Completed': 'success', 'Failed': 'danger', 'Refunded': 'info' };
+
+$(function () { loadPayments(); });
+
+function loadPayments() {
+    apiGet('/api/payments', function (data) {
+        allPayments = data;
+        var completed = data.filter(function (p) { return p.status === 'Completed'; });
+        var pending = data.filter(function (p) { return p.status === 'Pending'; });
+        var totalAmt = data.reduce(function (s, p) { return s + p.amount; }, 0);
+        $('#stat-total').text(data.length);
+        $('#stat-completed').text(completed.length);
+        $('#stat-pending').text(pending.length);
+        $('#stat-total-amount').text('$' + totalAmt.toLocaleString('en-US', { minimumFractionDigits: 2 }));
+        initPaymentsTable(data);
+    });
+}
+
+function initPaymentsTable(data) {
+    if (paymentsTable) { paymentsTable.clear().rows.add(data).draw(); return; }
+    var isAuth = !!localStorage.getItem('jwt_token');
+    var columns = [
+        { data: 'transactionId', render: function (d) { return d ? '<code>' + escapeHtml(d) + '</code>' : '<span class="text-muted">-</span>'; } },
+        { data: 'method', render: function (d) { var icon = methodIcons[d] || 'fa-money-bill'; return '<i class="fas ' + icon + ' me-1 text-primary"></i>' + escapeHtml(d.replace(/([A-Z])/g, ' $1').trim()); } },
+        { data: 'amount', render: function (d) { return '<span class="fw-bold">$' + Number(d).toFixed(2) + '</span>'; } },
+        { data: 'status', render: function (d) { var c = statusColors[d] || 'secondary'; return '<span class="badge bg-' + c + '">' + escapeHtml(d) + '</span>'; } },
+        { data: 'paidAt', render: function (d) { return d ? new Date(d).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : '-'; } },
+        { data: 'createdAt', render: function (d) { return new Date(d).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }); } }
+    ];
+    if (isAuth) {
+        columns.push({ data: null, orderable: false, render: function (d, t, row) {
+            if (row.status !== 'Pending') return '';
+            return '<button class="btn btn-sm btn-outline-success" onclick="completePayment(\'' + row.id + '\')">' +
+                '<i class="fas fa-check me-1"></i>Complete</button>';
+        }});
+    }
+    paymentsTable = $('#paymentsTable').DataTable({ data: data, columns: columns, responsive: true, pageLength: 10,
+        language: { emptyTable: '<div class="text-center py-4"><i class="fas fa-credit-card fa-3x text-muted mb-3"></i><p class="text-muted">No payments found</p></div>', search: '<i class="fas fa-search"></i>', searchPlaceholder: 'Search payments...' },
+        dom: '<"row"<"col-sm-6"l><"col-sm-6"f>>rtip'
+    });
+}
+
+function showCreatePaymentModal() {
+    $('#paymentForm')[0].reset();
+    new bootstrap.Modal('#paymentModal').show();
+}
+
+function savePayment() {
+    var payload = {
+        orderId: $('#paymentOrderId').val(),
+        amount: parseFloat($('#paymentAmount').val()) || 0,
+        method: $('#paymentMethod').val(),
+        transactionId: $('#paymentTransactionId').val() || null
+    };
+    if (!payload.orderId || !payload.amount || !payload.method) { return toastError('Order ID, amount, and method are required.'); }
+    apiRequest('POST', '/api/payments', payload, function () {
+        bootstrap.Modal.getInstance(document.getElementById('paymentModal')).hide();
+        toastSuccess('Payment created successfully!');
+        loadPayments();
+    });
+}
+
+function completePayment(id) {
+    Swal.fire({ title: 'Complete Payment?', text: 'Mark this payment as completed?', icon: 'question', showCancelButton: true, input: 'text', inputLabel: 'Transaction ID', inputPlaceholder: 'Enter transaction ID',
+        confirmButtonText: '<i class="fas fa-check me-1"></i>Complete', cancelButtonText: 'Cancel'
+    }).then(function (result) {
+        if (result.isConfirmed) {
+            apiRequest('POST', '/api/payments/' + id + '/complete', { transactionId: result.value || 'TXN-' + Date.now() }, function () {
+                toastSuccess('Payment completed!');
+                loadPayments();
+            });
+        }
+    });
+}
+</script>
+}

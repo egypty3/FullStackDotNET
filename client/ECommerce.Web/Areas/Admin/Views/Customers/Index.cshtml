@@ -1,0 +1,255 @@
+@{
+    ViewData["Title"] = "Customers";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4 animate__animated animate__fadeIn">
+    <div>
+        <h2 class="fw-bold mb-1"><i class="fas fa-users me-2 text-primary"></i>Customers</h2>
+        <p class="text-muted mb-0">Manage customer accounts</p>
+    </div>
+    <button class="btn btn-primary" onclick="showCreateCustomerModal()">
+        <i class="fas fa-plus me-2"></i>Add Customer
+    </button>
+</div>
+
+<!-- Stats Row -->
+<div class="row g-4 mb-4 animate__animated animate__fadeInUp">
+    <div class="col-md-4">
+        <div class="card shadow-sm border-0" style="border-left: 4px solid var(--bs-primary) !important;">
+            <div class="card-body text-center">
+                <i class="fas fa-users fa-2x text-primary mb-2"></i>
+                <h3 class="fw-bold" id="stat-total">0</h3>
+                <p class="text-muted mb-0">Total Customers</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card shadow-sm border-0" style="border-left: 4px solid var(--bs-success) !important;">
+            <div class="card-body text-center">
+                <i class="fas fa-user-check fa-2x text-success mb-2"></i>
+                <h3 class="fw-bold" id="stat-active">0</h3>
+                <p class="text-muted mb-0">Active Customers</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card shadow-sm border-0" style="border-left: 4px solid var(--bs-warning) !important;">
+            <div class="card-body text-center">
+                <i class="fas fa-user-slash fa-2x text-warning mb-2"></i>
+                <h3 class="fw-bold" id="stat-inactive">0</h3>
+                <p class="text-muted mb-0">Inactive Customers</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Customer Table -->
+<div class="card shadow-sm animate__animated animate__fadeInUp">
+    <div class="card-header bg-white">
+        <h5 class="mb-0"><i class="fas fa-list me-2"></i>Customer List</h5>
+    </div>
+    <div class="card-body">
+        <table id="customersTable" class="table table-hover w-100">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>City</th>
+                    <th>Status</th>
+                    <th>Joined</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Create/Edit Customer Modal -->
+<div class="modal fade" id="customerModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="customerModalTitle">
+                    <i class="fas fa-plus me-2"></i>Add Customer
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="customerForm">
+                    <input type="hidden" id="customerId" />
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-semibold">First Name *</label>
+                            <input type="text" class="form-control" id="customerFirstName" maxlength="100" required />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-semibold">Last Name *</label>
+                            <input type="text" class="form-control" id="customerLastName" maxlength="100" required />
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-semibold">Email *</label>
+                            <input type="email" class="form-control" id="customerEmail" maxlength="200" required />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-semibold">Phone</label>
+                            <input type="text" class="form-control" id="customerPhone" maxlength="20" />
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Date of Birth</label>
+                        <input type="date" class="form-control" id="customerDob" />
+                    </div>
+                    <hr />
+                    <h6 class="fw-semibold mb-3"><i class="fas fa-map-marker-alt me-1"></i>Shipping Address</h6>
+                    <div class="mb-3">
+                        <label class="form-label">Street</label>
+                        <input type="text" class="form-control" id="customerStreet" />
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">City</label>
+                            <input type="text" class="form-control" id="customerCity" />
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">State</label>
+                            <input type="text" class="form-control" id="customerState" />
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Zip Code</label>
+                            <input type="text" class="form-control" id="customerZip" />
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Country</label>
+                        <input type="text" class="form-control" id="customerCountry" />
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-1"></i>Cancel
+                </button>
+                <button type="button" class="btn btn-primary" onclick="saveCustomer()">
+                    <i class="fas fa-save me-1"></i>Save Customer
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+var customersTable;
+var allCustomers = [];
+
+$(function () { loadCustomers(); });
+
+function loadCustomers() {
+    apiGet('/api/customers', function (data) {
+        allCustomers = data;
+        var active = data.filter(function (c) { return c.isActive; }).length;
+        $('#stat-total').text(data.length);
+        $('#stat-active').text(active);
+        $('#stat-inactive').text(data.length - active);
+        initCustomersTable(data);
+    });
+}
+
+function initCustomersTable(data) {
+    if (customersTable) { customersTable.clear().rows.add(data).draw(); return; }
+    var isAuth = !!localStorage.getItem('jwt_token');
+    var columns = [
+        { data: null, render: function (d, t, row) { return '<i class="fas fa-user me-2 text-primary"></i><span class="fw-semibold">' + escapeHtml(row.firstName + ' ' + row.lastName) + '</span>'; } },
+        { data: 'email', render: function (d) { return '<a href="mailto:' + escapeHtml(d) + '">' + escapeHtml(d) + '</a>'; } },
+        { data: 'phone', render: function (d) { return escapeHtml(d || '-'); } },
+        { data: 'shippingCity', render: function (d) { return escapeHtml(d || '-'); } },
+        { data: 'isActive', render: function (d) { return d ? '<span class="badge bg-success"><i class="fas fa-check me-1"></i>Active</span>' : '<span class="badge bg-secondary"><i class="fas fa-ban me-1"></i>Inactive</span>'; } },
+        { data: 'createdAt', render: function (d) { return new Date(d).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }); } }
+    ];
+    if (isAuth) {
+        columns.push({ data: null, orderable: false, render: function (d, t, row) {
+            return '<div class="btn-group btn-group-sm">' +
+                '<button class="btn btn-outline-primary" title="Edit" onclick="editCustomer(\'' + row.id + '\')"><i class="fas fa-edit"></i></button>' +
+                '<button class="btn btn-outline-danger" title="Delete" onclick="deleteCustomer(\'' + row.id + '\')"><i class="fas fa-trash"></i></button></div>';
+        }});
+    }
+    customersTable = $('#customersTable').DataTable({ data: data, columns: columns, responsive: true, pageLength: 10,
+        language: { emptyTable: '<div class="text-center py-4"><i class="fas fa-users fa-3x text-muted mb-3"></i><p class="text-muted">No customers found</p></div>', search: '<i class="fas fa-search"></i>', searchPlaceholder: 'Search customers...' },
+        dom: '<"row"<"col-sm-6"l><"col-sm-6"f>>rtip'
+    });
+}
+
+function showCreateCustomerModal() {
+    $('#customerModalTitle').html('<i class="fas fa-plus me-2"></i>Add Customer');
+    $('#customerForm')[0].reset();
+    $('#customerId').val('');
+    new bootstrap.Modal('#customerModal').show();
+}
+
+function editCustomer(id) {
+    var c = allCustomers.find(function (x) { return x.id === id; });
+    if (!c) return;
+    $('#customerModalTitle').html('<i class="fas fa-edit me-2"></i>Edit Customer');
+    $('#customerId').val(c.id);
+    $('#customerFirstName').val(c.firstName);
+    $('#customerLastName').val(c.lastName);
+    $('#customerEmail').val(c.email);
+    $('#customerPhone').val(c.phone);
+    $('#customerDob').val(c.dateOfBirth ? c.dateOfBirth.substring(0, 10) : '');
+    $('#customerStreet').val(c.shippingStreet);
+    $('#customerCity').val(c.shippingCity);
+    $('#customerState').val(c.shippingState);
+    $('#customerZip').val(c.shippingZipCode);
+    $('#customerCountry').val(c.shippingCountry);
+    new bootstrap.Modal('#customerModal').show();
+}
+
+function saveCustomer() {
+    var id = $('#customerId').val();
+    var payload = {
+        firstName: $('#customerFirstName').val(),
+        lastName: $('#customerLastName').val(),
+        email: $('#customerEmail').val(),
+        phone: $('#customerPhone').val(),
+        dateOfBirth: $('#customerDob').val() || null,
+        street: $('#customerStreet').val(),
+        city: $('#customerCity').val(),
+        state: $('#customerState').val(),
+        zipCode: $('#customerZip').val(),
+        country: $('#customerCountry').val()
+    };
+    if (!payload.firstName || !payload.lastName || !payload.email) { return toastError('First name, last name, and email are required.'); }
+    if (id) {
+        payload.id = id;
+        apiRequest('PUT', '/api/customers/' + id, payload, function () {
+            bootstrap.Modal.getInstance(document.getElementById('customerModal')).hide();
+            toastSuccess('Customer updated successfully!');
+            loadCustomers();
+        });
+    } else {
+        apiRequest('POST', '/api/customers', payload, function () {
+            bootstrap.Modal.getInstance(document.getElementById('customerModal')).hide();
+            toastSuccess('Customer created successfully!');
+            loadCustomers();
+        });
+    }
+}
+
+function deleteCustomer(id) {
+    Swal.fire({ title: 'Delete Customer?', text: 'This action will deactivate the customer.', icon: 'warning', showCancelButton: true,
+        confirmButtonColor: '#dc3545', confirmButtonText: '<i class="fas fa-trash me-1"></i>Yes, delete!', cancelButtonText: 'Cancel'
+    }).then(function (result) {
+        if (result.isConfirmed) {
+            apiRequest('DELETE', '/api/customers/' + id, null, function () {
+                toastSuccess('Customer deleted successfully!');
+                loadCustomers();
+            });
+        }
+    });
+}
+</script>
+}
