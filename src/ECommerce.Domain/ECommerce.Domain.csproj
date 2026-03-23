@@ -1,8 +1,31 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+﻿<!--
+  ECommerce.Domain Project File
+  ==============================
+  This is the Domain layer of the ECommerce application, following Clean Architecture / DDD principles.
+  
+  The Domain layer is the innermost layer and has NO dependencies on other project layers.
+  It contains:
+    - Entities: Core business objects (Product, Order, Customer, etc.) with encapsulated business logic
+    - Value Objects: Immutable objects defined by their attributes (Money, Address)
+    - Enums: Domain-specific enumerations (OrderStatus, PaymentStatus, etc.)
+    - Interfaces: Repository contracts and Unit of Work pattern abstractions
+    - Common: Shared base classes (BaseEntity) used across all entities
+  
+  Key Design Patterns Used:
+    - Factory Method Pattern: Entities use static Create() methods instead of public constructors
+    - Repository Pattern: Abstractions for data access defined here, implemented in Infrastructure
+    - Unit of Work Pattern: Coordinates multiple repository operations in a single transaction
+    - Value Object Pattern: Money and Address are immutable records with self-validation
+    - Rich Domain Model: Entities encapsulate their own business rules and state transitions
+-->
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+    <!-- Target framework: .NET 10.0 -->
     <TargetFramework>net10.0</TargetFramework>
+    <!-- Enable implicit global using directives for common namespaces (System, System.Collections.Generic, etc.) -->
     <ImplicitUsings>enable</ImplicitUsings>
+    <!-- Enable C# nullable reference types for compile-time null safety checks -->
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
