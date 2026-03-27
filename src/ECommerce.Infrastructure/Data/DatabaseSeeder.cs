@@ -7,17 +7,33 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace ECommerce.Infrastructure.Data;
 
+/// <summary>
+/// Provides a static method to seed the database with initial reference data (admin user, categories,
+/// products, customers, employees, shippers, and coupons). Designed to be called once during
+/// application startup to ensure the database has a baseline set of data for development and demos.
+/// <para>
+/// Each entity group is only seeded if the corresponding table is empty, making the method
+/// safe to call on every startup (idempotent).
+/// </para>
+/// </summary>
 public static class DatabaseSeeder
 {
+    /// <summary>
+    /// Applies any pending EF Core migrations and then seeds the database with initial data
+    /// when the corresponding tables are empty. Creates its own DI scope so it can be called
+    /// directly from <c>Program.cs</c> using the root <see cref="IServiceProvider"/>.
+    /// </summary>
+    /// <param name="serviceProvider">The root service provider used to create a scoped lifetime.</param>
     public static async Task SeedAsync(IServiceProvider serviceProvider)
     {
         using var scope = serviceProvider.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
         var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
 
+        // Apply any pending migrations before seeding.
         await context.Database.MigrateAsync();
 
-        // Seed admin user
+        // Seed a default admin user if no users exist yet.
         if (!await userManager.Users.AnyAsync())
         {
             var admin = new ApplicationUser
@@ -31,7 +47,7 @@ public static class DatabaseSeeder
             await userManager.CreateAsync(admin, "Admin@123456");
         }
 
-        // Seed categories
+        // Seed default product categories used to classify inventory.
         if (!await context.Categories.AnyAsync())
         {
             var categories = new[]
@@ -48,7 +64,7 @@ public static class DatabaseSeeder
             await context.SaveChangesAsync();
         }
 
-        // Seed products
+        // Seed sample products across multiple categories for demonstration.
         if (!await context.Products.AnyAsync())
         {
             var electronics = await context.Categories.FirstAsync(c => c.Name == "Electronics");
@@ -71,7 +87,7 @@ public static class DatabaseSeeder
             await context.SaveChangesAsync();
         }
 
-        // Seed customers
+        // Seed sample customer accounts with shipping addresses.
         if (!await context.Customers.AnyAsync())
         {
             var customers = new[]
@@ -92,7 +108,7 @@ public static class DatabaseSeeder
             await context.SaveChangesAsync();
         }
 
-        // Seed employees
+        // Seed employee records across various departments.
         if (!await context.Employees.AnyAsync())
         {
             var employees = new[]
@@ -115,7 +131,7 @@ public static class DatabaseSeeder
             await context.SaveChangesAsync();
         }
 
-        // Seed shippers
+        // Seed shipping carrier companies used for order fulfillment.
         if (!await context.Shippers.AnyAsync())
         {
             var shippers = new[]
@@ -130,7 +146,7 @@ public static class DatabaseSeeder
             await context.SaveChangesAsync();
         }
 
-        // Seed coupons
+        // Seed promotional discount coupons with various types and expiration dates.
         if (!await context.Coupons.AnyAsync())
         {
             var coupons = new[]
